@@ -14,9 +14,9 @@ CLUMP_PARAMETERS:
   vMAX: # Controls how many clumps visit a cell. Keep between 10000 and 1000000. Bigger=less clumps
     - 18000  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 200000 # sheet=1 2020_07_02 ME_GFP_fibroblast
-    - 1      # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 100000 # sheet=2 2020_05_29 TR_GFP_fibroblast
     - 100000 # sheet=3 2021_07_13 GFP_TB_fibroblast
-    - 1      # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - 100000 # sheet=4 2020_08_12 TB_GFP_fibroblast
     - 100000 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 100000 # sheet=6 2022_11_02_TB_GFP_fib
 
@@ -30,9 +30,9 @@ ACCRUED_DAMAGE_PARAMETERS:
   vMax: # Controls how many virions visit a cell. Keep between 10000 and 1000000. Bigger=less virions
     - 20000  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 300000 # sheet=1 2020_07_02 ME_GFP_fibroblast
-    - 1      # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 100000 # sheet=2 2020_05_29 TR_GFP_fibroblast
     - 17000  # sheet=3 2021_07_13 GFP_TB_fibroblast
-    - 1      # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - 100000 # sheet=4 2020_08_12 TB_GFP_fibroblast
     - 45000  # sheet=5 2020_09_14 TR_GFP_epithelial
     - 45000  # sheet=6 2022_11_02_TB_GFP_fib
   beta: # Controls ???
