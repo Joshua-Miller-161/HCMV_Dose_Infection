@@ -40,7 +40,7 @@ To modify the simulation parameters themselves, such as vMax, gamma, kappa, beta
 > - Find the entry of *b* corresponding to *# sheet=2 2020_05_29 TR_GFP_fibroblast*. Delete 0.1 and change it to 0.15.
 > - Save the config file. **DO NOT CHANGE THE FILE NAME OR MOVE IT**
 
-**- - - - Running a simulation - - - -**
+## Running a simulation
 - If running from the terminal/command prompt, ensure you are in the correct folder this repository is located in. Should be something like: /users/my_name/.../HCMV_Dose_Infection.
 - Ensure that you have changed config.yml to what you want.
 - If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment.
@@ -67,8 +67,8 @@ There are two scripts for plotting simulation results, *make_simple_simul_plot* 
 - Make sure that the path is surrounded in quotations " ", save the file. **DO NOT CHANGE THE FILE NAME OR MOVE IT**
 - If you only want to see the figure and not save it, comment out the *fig.savefig* line at the bottom using a #
 
-**- - - - Running the plotting scripts - - - -**
-- If running from the terminal/command prompt, ensure you are in the correct folder this repository is located in. Should be something like: /users/my_name/.../HCMV_Dose_Infection.
+## Running the plotting scripts
+- If running from the terminal/command prompt, ensure you are in the correct folder this repository is located in. Should be something like: /users/my_name/.../HCMV_Dose_Infection
 - Ensure that you have changed config.yml to what you want.
-- If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment.
+- If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment
 - Type either *python make_simple_simul_plot.py* or *python plot_clump_simul.py* depending on what you want
