@@ -54,21 +54,22 @@ There are two scripts for plotting simulation results, *make_simple_simul_plot* 
 - In line 18, where it says "file", type the path to the simulation results file you want to plot. These paths will always have the formula:
 > simulation_results/simulation_type/filename.csv
 > Example: *"simulation_results/null/NullSimul_2022_11_02_TB_GFP_fib_s=50_vMax=800.0_b=0.1_n=5.csv"*
-- Make sure that the path is surrounded in quotations " ", save the file. **DO NOT CHANGE THE FILE NAME OR MOVE IT**
-- If you only want to see the figure and not save it, comment out the *fig.savefig* line at the bottom using a #
+- Make sure that the path is surrounded in quotations " ", save the file. **DO NOT CHANGE THE FILE NAME OR MOVE IT**.
+- If you only want to see the figure and not save it, comment out the *fig.savefig* line at the bottom using a #.
 
 **Setting up *plot_clump_simul.py*.**
 - Open this file in a Python IDE or a text editor.
 - In line 18, where it says "file_simul", type the path to the simulation results file you want to plot. These paths will always have the formula:
 > simulation_results/clump_simulation_type/filename.csv
+
 > Example: *"simulation_results/clump/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=1000.0_poly_norm_n=3.csv"*
 - In line 19, where it says "file_simul_size", type the path to the .json file of clump sizes which corresponds to the simulation. You can identify the matching files by parameters listed in the file name (ignore "n" and "run"). These .json files are contained in a subfolder called "clump_information".
 > Example: *"simulation_results/clump/clump_information/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=1000.0_poly_norm_run=1_CLUMP.json"*
-- Make sure that the path is surrounded in quotations " ", save the file. **DO NOT CHANGE THE FILE NAME OR MOVE IT**
-- If you only want to see the figure and not save it, comment out the *fig.savefig* line at the bottom using a #
+- Make sure that the path is surrounded in quotations " ", save the file. **DO NOT CHANGE THE FILE NAME OR MOVE IT**.
+- If you only want to see the figure and not save it, comment out the *fig.savefig* line at the bottom using a #.
 
 ## Running the plotting scripts
 - If running from the terminal/command prompt, ensure you are in the correct folder this repository is located in. Should be something like: /users/my_name/.../HCMV_Dose_Infection
 - Ensure that you have changed config.yml to what you want.
-- If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment
-- Type either *python make_simple_simul_plot.py* or *python plot_clump_simul.py* depending on what you want
+- If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment.
+- Type either *python make_simple_simul_plot.py* or *python plot_clump_simul.py* depending on what you want.
