@@ -1,0 +1,11 @@
+name: hcmv_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - lmfit
+  - matplotlib
+  - pandas
+  - numpy
+  - scipy
+  - openpyxl

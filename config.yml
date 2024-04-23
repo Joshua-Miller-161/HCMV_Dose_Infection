@@ -1,0 +1,121 @@
+SIMULATION_PARAMETERS:
+  scale: 100
+  gamma: .45
+  sheet: 6 # Selects which experimental dataset to use. 0-6: Dose-infection, 7: clump size distribution
+  num_simulations: 3
+  simul_name: 'clump_comp' # Type 'clump' for clump simulation,  
+                        # 'comp' for compensation simulation,
+                        # 'acc_dam' for accrued damage simulation,
+                        # 'clump_comp' for a simulation which combines clumping and compensation
+                        # 'clump_acc_dam' for a simulation which combines clumping and accrued damage
+                        # 'null' for null simulation
+  
+CLUMP_PARAMETERS:
+  vMAX:
+    - 18000  # sheet=0 2021_10_05 TB_GFP_epithelial
+    - 200000 # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - 1      # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 100000 # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 1      # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - 100000 # sheet=5 2020_09_14 TR_GFP_epithelial
+    - 100069 # sheet=6 2022_11_02_TB_GFP_fib
+
+  distribution: 'normal'
+  scheme: 'regular_polygon'
+  lb: 100   # nanometers
+  ub: 300   # nanometers
+  mean: 230 # nanometers
+
+ACCRUED_DAMAGE_PARAMETERS:
+  vMax:
+    - 20000  # sheet=0 2021_10_05 TB_GFP_epithelial
+    - 300000 # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - 1      # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 17000  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 1      # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - 45000  # sheet=5 2020_09_14 TR_GFP_epithelial
+    - 45000  # sheet=6 2022_11_02_TB_GFP_fib
+  beta:
+    - 0      # sheet=0 2021_10_05 TB_GFP_epithelial
+    - 0      # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - 0      # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - -0.08  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 0      # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - -0.4   # sheet=5 2020_09_14 TR_GFP_epithelial
+    - -0.4   # sheet=6 2022_11_02_TB_GFP_fib
+
+COMPENSATION_PARAMETERS:
+  vMax:
+    - 20000  # sheet=0 2021_10_05 TB_GFP_epithelial
+    - 300000 # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - 1      # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 80000  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 1      # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - 80000  # sheet=5 2020_09_14 TR_GFP_epithelial
+    - 40000  # sheet=6 2022_11_02_TB_GFP_fib
+  kappa:
+    - .35    # sheet=0 2021_10_05 TB_GFP_epithelial
+    - 0      # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - 0      # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - -0.05  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 0      # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - -0.05  # sheet=5 2020_09_14 TR_GFP_epithelial
+    - 0.05  # sheet=6 2022_11_02_TB_GFP_fib
+
+NULL_PARAMETERS:
+  vMax:
+    - 20000  # sheet=0 2021_10_05 TB_GFP_epithelial
+    - 300000 # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - 1      # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 80000  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 1      # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - 80000  # sheet=5 2020_09_14 TR_GFP_epithelial
+    - 40000  # sheet=6 2022_11_02_TB_GFP_fib
+  b:
+    - 0.1  # sheet=0 2021_10_05 TB_GFP_epithelial
+    - 0.1  # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - 0.1  # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 0.1  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 0.1  # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - 0.1  # sheet=5 2020_09_14 TR_GFP_epithelial
+    - 0.1  # sheet=6 2022_11_02_TB_GFP_fib
+
+CELL_PARAMETERS:
+  mu_res: 12
+  std_res: 1
+
+GFP_VIRUS_PARAMETERS:
+  mu_inf: 0
+  std_inf: 1
+
+CHERRY_VIRUS_PARARMETERS:
+  mu_inf: 0
+  std_inf: 1
+
+PLOTTING:
+  markers_dict:
+    'GFP': 's'
+    'cherry': '^'
+    'coinfection': 'o'
+
+  colors_dict:
+    'GFP': 'green'
+    'cherry': 'red'
+    'coinfection': 'black'
+
+  LOWERS:
+    - 2  # sheet=0 2021_10_05 TB_GFP_epithelial
+    - 20 # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - 0  # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 6  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 0  # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - 0  # sheet=5 2020_09_14 TR_GFP_epithelial
+    - 5  # sheet=6 2022_11_02_TB_GFP_fib
+  UPPERS:
+    - 36  # sheet=0 2021_10_05 TB_GFP_epithelial
+    - -15 # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - -1  # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 36  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - -1  # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - -1  # sheet=5 2020_09_14 TR_GFP_epithelial
+    - 36  # sheet=6 2022_11_02_TB_GFP_fib
