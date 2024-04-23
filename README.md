@@ -19,7 +19,7 @@ You can install these using two methods:
    - After it finishes, run "conda activate hcmv_env". Now you can execute the Python code.
            **You must navigate to HCMV_Dose_Infection and activate the environment every time you want to run the code**
 
-  **Running a simulation**
+  ****Running a simulation**** \n
   A config file, called "config.yml" is provided which supplies key parameters to the Python scripts that control the simulation. **DO NOT MOVE THIS FILE**
   This config file can be opened and modified with most text editors.
 
