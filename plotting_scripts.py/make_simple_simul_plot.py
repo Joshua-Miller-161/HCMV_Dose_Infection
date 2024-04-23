@@ -15,9 +15,6 @@ from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell
 #====================================================================
 ''' Get simulation data '''
 
-#file = 'simulation_results/clump/ClumpSimul_2022_11_02_TB_GFP_fib_s=50_vMax=2000.0_poly_norm_n=50.csv'
-#file = 'simulation_results/acc_dam/AccDamSimul_2022_11_02_TB_GFP_fib_s=50_vMax=900.0_b=-0.4_n=50.csv'
-#file = 'simulation_results/comp/CompSimul_2022_11_02_TB_GFP_fib_s=50_vMax=800.0_k=0.05_n=50.csv'
 file = 'simulation_results/null/NullSimul_2022_11_02_TB_GFP_fib_s=50_vMax=800.0_b=0.1_n=5.csv'
 df_simul = pd.read_csv(file)
 #--------------------------------------------------------------------
