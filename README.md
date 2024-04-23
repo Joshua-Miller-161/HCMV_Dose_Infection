@@ -16,8 +16,8 @@ You can install these using two methods:
 2. Anaconda (conda)
    - You must first have Anaconda, a Python environment mamanger, installed on your device.
    - Navigate to the folder in which this repository is located. Should be something like /users/my_name/.../HCMV_Dose_Infection
-   - Run the following command "conda env create -f hcmv_env.yaml -n hcmv_env"
-   - After it finishes, run "conda activate hcmv_env". Now you can execute the Python code.
+   - Run the following command: *conda env create -f hcmv_env.yaml -n hcmv_env*
+   - After it finishes, run: *conda activate hcmv_env*. Now you can execute the Python code.
    - **You must navigate to HCMV_Dose_Infection and activate the environment every time you want to run the code**
 
 # Running a simulation
@@ -34,8 +34,16 @@ To choose which experimental dataset you want to compare the simulation against,
 
 To modify the simulation parameters themselves, such as vMax, gamma, kappa, beta, b, etc., navigate to the appropriate simulation, appropriate sheet, and variable you want to change, change it, then save the config file. **DO NOT CHANGE THE FILE NAME OR MOVE IT**. Example 1:
 
-> You are running a 'null' simulation against the '2020_05_29 TR_GFP_fibroblast' dataset and want to change the value of b from 0.1 to 0.15.
-> - Navigate to the "NULL_PARAMETERS" section of the config file. 
-> - Navigate to the "b" subsection under "NULL_PARAMETERS". 
-> - Find the entry of "b" corresponding to # sheet=2 2020_05_29 TR_GFP_fibroblast. Delete 0.1 and change it to 0.15.
+> You are running a *null* simulation against the *2020_05_29 TR_GFP_fibroblast* dataset and want to change the value of b from 0.1 to 0.15.
+> - Navigate to the *NULL_PARAMETERS* section of the config file. 
+> - Navigate to the *b* subsection under *NULL_PARAMETERS*. 
+> - Find the entry of *b* corresponding to *# sheet=2 2020_05_29 TR_GFP_fibroblast*. Delete 0.1 and change it to 0.15.
 > - Save the config file. **DO NOT CHANGE THE FILE NAME OR MOVE IT**
+
+**Running a simulation**
+- If running from the terminal/command prompt. Ensure you are in the correct folder this repository is located in. Should be something like: /users/my_name/.../HCMV_Dose_Infection.
+- Ensure that you have changed config.yml to what you want.
+- If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment.
+- Type *python run_simulation.py* and press enter.
+
+# Plotting a simulation
