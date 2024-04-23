@@ -41,9 +41,21 @@ To modify the simulation parameters themselves, such as vMax, gamma, kappa, beta
 > - Save the config file. **DO NOT CHANGE THE FILE NAME OR MOVE IT**
 
 **Running a simulation**
-- If running from the terminal/command prompt. Ensure you are in the correct folder this repository is located in. Should be something like: /users/my_name/.../HCMV_Dose_Infection.
+- If running from the terminal/command prompt, ensure you are in the correct folder this repository is located in. Should be something like: /users/my_name/.../HCMV_Dose_Infection.
 - Ensure that you have changed config.yml to what you want.
 - If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment.
 - Type *python run_simulation.py* and press enter.
 
 # Plotting a simulation
+There are two scripts for plotting simulation results, *make_simple_simul_plot* and *plot_clump_simul*. Both make a plot comparing the simulation results against an experimental dataset. But *plot_clump_simul* shows extra information about the clump distribution.
+
+**Setting up *make_simple_simul_plot.py*.**
+- Open this file in a Python IDE or a text editor.
+- 
+
+Example: *simulation_results/null/NullSimul_2022_11_02_TB_GFP_fib_s=50_vMax=800.0_b=0.1_n=5.csv*
+
+- If running from the terminal/command prompt, ensure you are in the correct folder this repository is located in. Should be something like: /users/my_name/.../HCMV_Dose_Infection.
+- Ensure that you have changed config.yml to what you want.
+- If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment.
+- Type either *python make_simple_simul_plot.py* or *python plot_clump_simul.py* depending on what you want

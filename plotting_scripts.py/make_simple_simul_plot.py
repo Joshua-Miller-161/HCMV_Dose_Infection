@@ -34,9 +34,9 @@ r_stdev         = PARAM_DICT_SIMUL['sigmaR']
 gamma           = PARAM_DICT_SIMUL['gamma']
 vMax            = PARAM_DICT_SIMUL['vMax']
 
+assert simul_name in ['clump', 'comp', 'acc_dam', 'null', 'clump_comp', 'clump_acc_dam'], "Got: "+simul_name+". 'simul_name' must be one of 'clump', 'comp', 'acc_dam', 'null', 'clump_comp', or 'clump_acc_dam'."
 
-
-if (simul_name == 'clump'):
+if ('clump' in simul_name):
     scheme = PARAM_DICT_SIMUL['scheme']
     distribution = PARAM_DICT_SIMUL['distribution']
 elif (simul_name == 'acc_dam'):
@@ -194,19 +194,29 @@ plt.yscale('log')
 plt.xlim(xMin, xMax)
 plt.ylim(yMin, yMax)
 #--------------------------------------------------------------------
-if (simul_name == 'clump'):
-    plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax))
+if ('clump' in simul_name):
+    if (simul_name == 'clump'):
+        plt.title(SHEET_NAMES[sheet] + ' | Clumping')
+        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax))
+    elif (simul_name == 'clump_comp'):
+        plt.title(SHEET_NAMES[sheet] + ' | Clumping + Compensation')
+        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa]))
+    elif (simul_name == 'clump_acc_dam'):
+        plt.title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
+        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta']))
     plt.text(1.1 * xMin, .05 * yMax, scheme)
     plt.text(1.1 * xMin, .025 * yMax, distribution)
-    plt.title(SHEET_NAMES[sheet] + ' | Clumping')
+
 elif (simul_name == 'acc_dam'):
     plt.text(1.1 * xMin, .08 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta))
     plt.text(1.1 * xMin, .04 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
     plt.title(SHEET_NAMES[sheet] + ' | Acc. Damage')
+
 elif (simul_name == 'comp'):
     plt.text(1.1 * xMin, .08 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa))
     plt.text(1.1 * xMin, .04 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
     plt.title(SHEET_NAMES[sheet] + ' | Compensation')
+
 elif (simul_name == 'null'):
     plt.text(1.1 * xMin, .08 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b']))
     plt.text(1.1 * xMin, .04 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}+b$')
@@ -217,7 +227,8 @@ plt.text(.6 * xMin, 2.2 * yMax, '', fontsize=16, fontweight='bold', va='top', ha
 plt.show()
 #====================================================================
 ''' Save figure '''
-if (simul_name == 'clump'):
+filename = ''
+if ('clump' in simul_name):
     scheme_short = ''
     if (PARAM_DICT_SIMUL['scheme']=='linear'):
         scheme_short='lin'
@@ -229,7 +240,13 @@ if (simul_name == 'clump'):
         dist_short = 'norm'
     elif (distribution=='uniform'):
         dist_short = 'uni'
-    filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_"+scheme_short+"_"+dist_short+"_n="+str(num_simulations) # Specify filename
+    
+    if (simul_name == 'clump'):
+        filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_"+scheme_short+"_"+dist_short+"_n="+str(num_simulations) # Specify filename
+    elif (simul_name == 'clump_comp'):
+        filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_k="+str(PARAM_DICT_SIMUL['kappa'])+"_"+scheme_short+"_"+dist_short+"_n="+str(num_simulations) # Specify filename
+    elif (simul_name == 'clump_acc_dam'):
+        filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(PARAM_DICT_SIMUL['beta'])+"_"+scheme_short+"_"+dist_short+"_n="+str(num_simulations) # Specify filename
 
 elif (simul_name == 'acc_dam'):
     filename = "AccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(beta)+"_n="+str(num_simulations)
@@ -240,4 +257,4 @@ elif (simul_name == 'comp'):
 elif (simul_name == 'null'):
     filename = "NullSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(b)+"_n="+str(num_simulations) 
 
-fig.savefig(os.path.join('figs', filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory

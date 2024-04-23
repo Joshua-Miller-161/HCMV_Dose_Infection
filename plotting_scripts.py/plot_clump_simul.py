@@ -14,8 +14,20 @@ from misc.misc_utils import Trapezoid, FlattenMeans, ExtractParams
 from plotting_utils.utils import negLogLikeModel, model,  CombineSameGenWell
 from simulation_utils.utils import PrepareData
 #====================================================================
+''' Files '''
+file_simul = "simulation_results/clump/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=1000.0_poly_norm_n=3.csv"
+file_simul_size = "simulation_results/clump/clump_information/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=1000.0_poly_norm_run=1_CLUMP.json"
+
+file_data = "data/Experimental_data_Ed_Josh.xlsx"
+
+SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
+               '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
+               '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
+               '2022_11_02_TB_GFP_fib', '2022_10_27_TB_size_distribution']
+
+assert "clump" or "Clump" in file_simul, "Simulation type must be 'clump', 'clump_comp', or 'clump_acc_dam'."
+#====================================================================
 ''' Key parameters '''
-sheet = 3
 flatten_means = True
 cutoff = 91.28
 #====================================================================
@@ -37,18 +49,6 @@ print(UPPERS)
 MARKERS = config['PLOTTING']['markers_dict']#['o', '^', 's', 'D']
 COLORS = config['PLOTTING']['colors_dict']
 LETTERS = ['A', 'B', 'C']
-#====================================================================
-''' Files '''
-file_simul = "simulation_results/clump/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=1000.0_poly_norm_n=3.csv"
-file_simul_size = "simulation_results/clump/clump_information/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=1000.0_poly_norm_run=1_CLUMP.json"
-file_data = "data/Experimental_data_Ed_Josh.xlsx"
-
-SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
-               '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
-               '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
-               '2022_11_02_TB_GFP_fib', '2022_10_27_TB_size_distribution']
-
-assert "clump" or "Clump" in file_simul, "Simulation type must be 'clump', 'clump_comp', or 'clump_acc_dam'."
 #====================================================================
 ''' Get simulation data '''
 df_simul = pd.read_csv(file_simul)
