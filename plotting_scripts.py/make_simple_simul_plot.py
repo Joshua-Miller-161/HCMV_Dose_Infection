@@ -229,8 +229,10 @@ if ('clump' in simul_name):
     scheme_short = ''
     if (PARAM_DICT_SIMUL['scheme']=='linear'):
         scheme_short='lin'
-    elif (scheme=='regular_polygon'):
+    elif (PARAM_DICT_SIMUL['scheme']=='regular_polygon'):
         scheme_short='poly'
+    elif (PARAM_DICT_SIMUL['scheme']=='sphere_packing'):
+        scheme_short='sp'
 
     dist_short = ''
     if (distribution=='normal'):

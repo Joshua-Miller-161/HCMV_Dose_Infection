@@ -50,6 +50,10 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
     elif (PARAM_DICT['scheme']=='regular_polygon'):
         max_virions_in_clump = round(np.pi / np.arcsin(PARAM_DICT['lb'] / max(diameter_nz)))
         print("poly | diam=", max(diameter_nz), ", max=", max_virions_in_clump)
+
+    elif (PARAM_DICT['scheme']=='sphere_packing'):
+        max_virions_in_clump = round(0.64 * (max(diameter_nz) / PARAM_DICT['lb'])**3)
+        print("sphere | diam=", max(diameter_nz), ", max=", max_virions_in_clump)
     #----------------------------------------------------------------
     ''' Simulate infections '''
     for init in range(len(GEN_WELL_DATA)): # Iterate thorugh each experiment

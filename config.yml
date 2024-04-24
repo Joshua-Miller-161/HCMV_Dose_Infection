@@ -1,5 +1,5 @@
 SIMULATION_PARAMETERS:
-  simul_name: 'clump_comp' # Type 'clump' for clump simulation,  
+  simul_name: 'clump' # Type 'clump' for clump simulation,  
                            # 'comp' for compensation simulation,
                            # 'acc_dam' for accrued damage simulation,
                            # 'clump_comp' for a simulation which combines clumping and compensation
@@ -18,13 +18,13 @@ CLUMP_PARAMETERS:
     - 100000 # sheet=3 2021_07_13 GFP_TB_fibroblast
     - 100000 # sheet=4 2020_08_12 TB_GFP_fibroblast
     - 100000 # sheet=5 2020_09_14 TR_GFP_epithelial
-    - 100000 # sheet=6 2022_11_02_TB_GFP_fib
+    - 100000  # sheet=6 2022_11_02_TB_GFP_fib
 
-  distribution: 'normal'
-  scheme: 'regular_polygon'
-  lb: 100   # nanometers
-  ub: 300   # nanometers
-  mean: 230 # nanometers
+  distribution: 'normal'   # How to same virion size (nm). Only choose 'uniform' or 'normal'
+  scheme: 'sphere_packing' # How to arrange smaller virions into a sphere. Only choose 'linear', 'regular_polygon', or 'sphere_packing'
+  lb: 100   # Lower bound of virion size (nm)
+  ub: 300   # Upper bound of virion size (nm)
+  mean: 230 # Average virion size (nm)
 
 ACCRUED_DAMAGE_PARAMETERS:
   vMax: # Controls how many virions visit a cell. Keep between 10000 and 1000000. Bigger=less virions
@@ -60,7 +60,7 @@ COMPENSATION_PARAMETERS:
     - -0.05  # sheet=3 2021_07_13 GFP_TB_fibroblast
     - 0      # sheet=4 2020_08_12 TB_GFP_fibroblast
     - -0.05  # sheet=5 2020_09_14 TR_GFP_epithelial
-    - 0.05  # sheet=6 2022_11_02_TB_GFP_fib
+    - 0.0  # sheet=6 2022_11_02_TB_GFP_fib
 
 NULL_PARAMETERS:
   vMax: # Controls how many virions visit a cell. Keep between 10000 and 1000000. Bigger=less virions

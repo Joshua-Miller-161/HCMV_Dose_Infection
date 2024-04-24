@@ -167,12 +167,15 @@ def ClumpMetrics2(NUM_CLUMPS):
                 CLUMP_IDS.append(clump_num)
             clump_num = clump_num + 1
 
-    print("NUM_CLUMPS =", NUM_CLUMPS, ", len =", len(NUM_CLUMPS), " | len(CLUMP_IDS) =", len(CLUMP_IDS))
+    total = 0
+    for i in range(len(NUM_CLUMPS)):
+        total += (i+1) * NUM_CLUMPS[i]
+    print("NUM_CLUMPS =", NUM_CLUMPS, ", largest clump =", len(NUM_CLUMPS)+1, ", virions in NUM_CLUMPS =", total, " | len(CLUMP_IDS) =", len(CLUMP_IDS))
     print("~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-")
     return CLUMP_IDS
 #====================================================================
 def CalcNumClumps(total_virions, mean, lb, ub, max_virions_in_clump, diameter_nz, scheme='linear', dist='normal'):
-    num_clumps_of_size_i = np.zeros(max_virions_in_clump) # i refers to position in list, pos. 0 means clump size 1
+    num_clumps_of_size_i = np.zeros(max_virions_in_clump, int) # i refers to position in list, pos. 0 means clump size 1
 
     virions_used = 0
 
@@ -181,29 +184,29 @@ def CalcNumClumps(total_virions, mean, lb, ub, max_virions_in_clump, diameter_nz
         # std_1:   199.692402 (init = 100)
         # amp_1:   0.92133552 (init = 0.995)
         # skew_1:  3.56933583 (init = 0.995)
-        diam = skewnorm.rvs(3.569, 173.884, 200, size=1)[0] # Best parameters so far
-        if (diam < lb):
-            diam = lb
-        elif (diam > max(diameter_nz)):
-            diam = diam > max(diameter_nz)
+        diameter = skewnorm.rvs(3.569, 173.884, 200, size=1)[0] # Best parameters so far
+        if (diameter < lb):
+            diameter = lb
+        elif (diameter > max(diameter_nz)):
+            diameter = max(diameter_nz)
         
-        num_virions, virion_diam = GenClumpFromDiameter(diam, mean, lb, ub, scheme=scheme, dist=dist)
+        num_virions, virion_diam = GenClumpFromDiameter(diameter, mean, lb, ub, scheme=scheme, dist=dist)
         
         num_clumps_of_size_i[num_virions-1] += 1
 
         virions_used += num_virions
     # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    # print(num_clumps_of_size_i)
+    #print("num_clumps_of_size_i=", num_clumps_of_size_i)
     # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     #----------------------------------------------------------------
     ''' Clean up and correct any errors '''
-    num_clumps_of_size_i = np.asarray(num_clumps_of_size_i)
     for valid_end in range(num_clumps_of_size_i.shape[0]-1, 0, -1):
         if (num_clumps_of_size_i[valid_end] > 0):
             break
     num_clumps_of_size_i = num_clumps_of_size_i[:valid_end+1]
+    #print("num_clumps_of_size_i=", np.shape(num_clumps_of_size_i), num_clumps_of_size_i)
 
     total = 0
     for i in range(num_clumps_of_size_i.shape[0]):
@@ -222,11 +225,42 @@ def CalcNumClumps(total_virions, mean, lb, ub, max_virions_in_clump, diameter_nz
     num_clumps_of_size_i = num_clumps_of_size_i[:valid_end+1]
     #print("final:", num_clumps_of_size_i, ", len:", num_clumps_of_size_i.shape[0], ',', total, ',', total_virions)
 
+
+
+
+
+
+
+
+    # ''' WORKS FOR LIN AND POLY Clean up and correct any errors '''
+    # for valid_end in range(num_clumps_of_size_i.shape[0]-1, 0, -1):
+    #     if (num_clumps_of_size_i[valid_end] > 0):
+    #         break
+    # num_clumps_of_size_i = num_clumps_of_size_i[:valid_end+1]
+    # print("num_clumps_of_size_i=", num_clumps_of_size_i)
+
+    # total = 0
+    # for i in range(num_clumps_of_size_i.shape[0]):
+    #     total += (i+1) * num_clumps_of_size_i[i]
+
+    # #print("pre  :", num_clumps_of_size_i, ", len:", num_clumps_of_size_i.shape[0], ',', total, ',', total_virions)
+    # num_clumps_of_size_i[0] += (total_virions-total)
+    # #print("post :", num_clumps_of_size_i, ", len:", num_clumps_of_size_i.shape[0], ',', total, ',', total_virions)
+
+    # if (num_clumps_of_size_i[0] < 0):
+    #     num_clumps_of_size_i[0] += (num_clumps_of_size_i.shape[0]+1) * num_clumps_of_size_i[-1]
+    #     num_clumps_of_size_i[-1] -= 1
+    # for valid_end in range(num_clumps_of_size_i.shape[0]-1, 0, -1):
+    #     if (num_clumps_of_size_i[valid_end] > 0):
+    #         break
+    # num_clumps_of_size_i = num_clumps_of_size_i[:valid_end+1]
+    # #print("final:", num_clumps_of_size_i, ", len:", num_clumps_of_size_i.shape[0], ',', total, ',', total_virions)
+
     return num_clumps_of_size_i
 #====================================================================
 def GenClumpFromDiameter(diameter, mean, lb, ub, scheme='linear', dist='uniform', stdev=70, target_x=None, target_prob=0.004,
                          tolerance=0.01):
-    assert (scheme=='linear' or scheme=='regular_polygon'), "scheme must be 'linear' or 'regular_polygon'."
+    assert (scheme in ['linear', 'regular_polygon', 'sphere_packing']), "scheme must be 'linear', 'regular_polygon', or 'sphere_packing'."
     assert (dist=='uniform' or dist=='normal'), "dist must be 'uniform' or 'normal'."
     #----------------------------------------------------------------
     err = 9999
@@ -253,7 +287,9 @@ def GenClumpFromDiameter(diameter, mean, lb, ub, scheme='linear', dist='uniform'
         elif (scheme=='regular_polygon'):
             virions_in_clump = np.pi / np.arcsin(virion_diam / diameter)
             #print("POLY:", virion_diam, diameter, np.arcsin(virion_diam / diameter), virions_in_clump)
-
+        elif (scheme=='sphere_packing'):
+            virions_in_clump = 0.64 * (diameter / virion_diam)**3
+        
         virions_in_clump_low = int(virions_in_clump)
         virions_in_clump_hi  = virions_in_clump_low + 1
 

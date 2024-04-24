@@ -52,9 +52,9 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
     if ('clump' in simul_name):
         if (save_path==None and simul_name == 'clump'):
             save_path = os.path.join(os.getcwd(), 'simulation_results/clump')
-        elif (save_path==None and 'clump_comp'):
+        elif (save_path==None and simul_name == 'clump_comp'):
             save_path = os.path.join(os.getcwd(), 'simulation_results/clump_comp')
-        elif (save_path==None and 'clump_acc_dam'):
+        elif (save_path==None and simul_name == 'clump_acc_dam'):
             save_path = os.path.join(os.getcwd(), 'simulation_results/clump_acc_dam')
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         scheme_short = ''
@@ -62,6 +62,8 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             scheme_short='lin'
         elif (PARAM_DICT['scheme']=='regular_polygon'):
             scheme_short='poly'
+        elif (PARAM_DICT['scheme']=='sphere_packing'):
+            scheme_short='sp'
 
         dist_short = ''
         if (PARAM_DICT['distribution']=='normal'):

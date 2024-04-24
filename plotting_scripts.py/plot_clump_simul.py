@@ -15,8 +15,8 @@ from plotting_utils.utils import negLogLikeModel, model,  CombineSameGenWell
 from simulation_utils.utils import PrepareData
 #====================================================================
 ''' Files '''
-file_simul = "simulation_results/clump/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=1000.0_poly_norm_n=3.csv"
-file_simul_size = "simulation_results/clump/clump_information/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=1000.0_poly_norm_run=1_CLUMP.json"
+file_simul = "simulation_results/clump/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=450.0_sp_norm_n=3.csv"
+file_simul_size = "simulation_results/clump/clump_information/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=450.0_sp_norm_run=0_CLUMP.json"
 
 file_data = "data/Experimental_data_Ed_Josh.xlsx"
 
@@ -290,6 +290,8 @@ if (scheme=='linear'):
     scheme_short='lin'
 elif (scheme=='regular_polygon'):
     scheme_short='poly'
+elif (scheme=='sphere_packing'):
+    scheme_short='sp'
 
 dist_short = ''
 if (distribution=='normal'):
@@ -303,6 +305,6 @@ if (simul_name == 'clump'):
 elif (simul_name == 'clump_comp'):
     filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_k="+str(PARAM_DICT_SIMUL['kappa'])+"_"+scheme_short+"_"+dist_short # Specify filename
 elif (simul_name == 'clump_acc_dam'):
-    filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(PARAM_DICT_SIMUL['beta'])+"_"+scheme_short+"_"+dist_short # Specify filename
+    filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(PARAM_DICT_SIMUL['beta'])+"_"+scheme_short+"_"+dist_short # Specify filename
 
-fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
