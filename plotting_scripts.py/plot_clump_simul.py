@@ -15,8 +15,8 @@ from plotting_utils.utils import negLogLikeModel, model,  CombineSameGenWell
 from simulation_utils.utils import PrepareData
 #====================================================================
 ''' Files '''
-file_simul = "simulation_results/clump/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=450.0_sp_norm_n=3.csv"
-file_simul_size = "simulation_results/clump/clump_information/ClumpSimul_2022_11_02_TB_GFP_fib_s=100_vMax=450.0_sp_norm_run=0_CLUMP.json"
+file_simul = "simulation_results/clump_acc_dam/ClumpAccDamSimul_2022_11_02_TB_GFP_fib_s=100_vMax=700.0_b=-2.0_sp_fix_n=3.csv"
+file_simul_size = "simulation_results/clump_acc_dam/clump_information/ClumpAccDamSimul_2022_11_02_TB_GFP_fib_s=100_vMax=700.0_b=-2.0_sp_fix_run=0_CLUMP.json"
 
 file_data = "data/Experimental_data_Ed_Josh.xlsx"
 
@@ -206,17 +206,17 @@ CLUMP_MARKERS = ['s', '^', 'o']
 NUM_CLUMPS_2  = CLUMP_DICT[str(GEN_WELL_SIMUL[len(GEN_WELL_SIMUL) - 1])]
 CLUMP_SIZES_2 = np.arange(1, len(NUM_CLUMPS_2)+1)
 
-ax2.vlines(CLUMP_SIZES_2, 0, NUM_CLUMPS_2, colors='y', lw=3, alpha=0.7)
+ax2.vlines(CLUMP_SIZES_2, 0, NUM_CLUMPS_2, colors='y', lw=3, alpha=0.7, zorder=0)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 NUM_CLUMPS_1  = CLUMP_DICT[str(GEN_WELL_SIMUL[int(len(GEN_WELL_SIMUL) / 2)])]
 CLUMP_SIZES_1 = np.arange(1, np.shape(NUM_CLUMPS_1)[0]+1)
 
-ax2.vlines(CLUMP_SIZES_1, 0, NUM_CLUMPS_1, colors='r', lw=3, alpha=0.5)
+ax2.vlines(CLUMP_SIZES_1, 0, NUM_CLUMPS_1, colors='r', lw=3, alpha=0.5, zorder=1)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 NUM_CLUMPS_0 = CLUMP_DICT[str(GEN_WELL_SIMUL[0])]
 CLUMP_SIZES_0 = np.arange(1, np.shape(NUM_CLUMPS_0)[0]+1)
 
-ax2.vlines(CLUMP_SIZES_0, 0, NUM_CLUMPS_0, colors='b', lw=3, alpha=0.5)
+ax2.vlines(CLUMP_SIZES_0, 0, NUM_CLUMPS_0, colors='b', lw=3, alpha=0.5, zorder=2)
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ax2.scatter(CLUMP_SIZES_2, NUM_CLUMPS_2, s = 50, color='yellow', edgecolors='black', marker=CLUMP_MARKERS[2], label = 'Gen./well = ' + str(GEN_WELL_SIMUL[len(GEN_WELL_SIMUL) - 1]))
 ax2.scatter(CLUMP_SIZES_1, NUM_CLUMPS_1, s = 50, color='red', edgecolors ='black', marker=CLUMP_MARKERS[1], label='Gen./well = ' + str(GEN_WELL_SIMUL[int(len(GEN_WELL_SIMUL) / 2)]))
@@ -256,7 +256,7 @@ elif (simul_name == 'clump_comp'):
     ax0.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax) +", "+r'$\kappa=$'+str(PARAM_DICT_SIMUL['kappa']))
 elif (simul_name == 'clump_acc_dam'):
     ax0.set_title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
-    ax0.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax) + ", " + 'r$\beta=$' + str(PARAM_DICT_SIMUL['beta']))
+    ax0.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax) + ", " + r'$\beta=$' + str(PARAM_DICT_SIMUL['beta']))
 
 ax0.text(1.1 * xMin, .05 * yMax, scheme)
 ax0.text(1.1 * xMin, .025 * yMax, distribution)
@@ -298,6 +298,8 @@ if (distribution=='normal'):
     dist_short = 'norm'
 elif (distribution=='uniform'):
     dist_short = 'uni'
+elif (distribution=='fixed'):
+    dist_short = 'fix'
 
 filename = ''
 if (simul_name == 'clump'):
@@ -307,4 +309,4 @@ elif (simul_name == 'clump_comp'):
 elif (simul_name == 'clump_acc_dam'):
     filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(PARAM_DICT_SIMUL['beta'])+"_"+scheme_short+"_"+dist_short # Specify filename
 
-#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory

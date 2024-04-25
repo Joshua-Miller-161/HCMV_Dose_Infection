@@ -116,9 +116,8 @@ def Innoculation(Viron, Cell, gamma, acc_dam=False, beta=0):
 
     resistivity = Cell.r
     if acc_dam:
-        #print("ACCC DAAMMM", Cell.r, beta, Cell.inter)
         resistivity = Cell.r + beta * Cell.inter
-
+        
     if (Viron.i > resistivity):
         is_successful = True
         #print(" - Successful infection | i = ", Viron.i, ", r = ", Cell.r, " | Cell.inter = ", Cell.inter)
@@ -138,7 +137,7 @@ def Innoculation(Viron, Cell, gamma, acc_dam=False, beta=0):
     if acc_dam:
         #print("ACCC DAAMMM", Cell.inter)
         Cell.inter += 1
-
+        #print("ACCC DAAMMM res=", round(resistivity, 3), ", inf=", round(Viron.i, 3), ", beta=", beta, ", gamma=", gamma, ", Cell.inter=", Cell.inter)
     return is_successful
 #====================================================================
 def model(x, params):
@@ -174,27 +173,44 @@ def ClumpMetrics2(NUM_CLUMPS):
     print("~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-")
     return CLUMP_IDS
 #====================================================================
-def CalcNumClumps(total_virions, mean, lb, ub, max_virions_in_clump, diameter_nz, scheme='linear', dist='normal'):
+def CalcNumClumps(total_virions, max_virions_in_clump, diameter_nz,
+                  mean_clump_diam=173.884, std_clump_diam=200, skew_clump_diam=3.569,
+                  mean_virion_diam=230, lb_virion_diam=150, ub_virion_diam=300, std_virion_diam=35,
+                  scheme='sphere_packing', distribution='fixed', tolerance=0.1):
+    assert (scheme in ['linear', 'regular_polygon', 'sphere_packing']), "scheme must be 'linear', 'regular_polygon', or 'sphere_packing'."
+    assert (distribution in ['uniform', 'normal', 'fixed']), "dist must be 'uniform', 'normal' or 'fixed'."
+    #----------------------------------------------------------------
     num_clumps_of_size_i = np.zeros(max_virions_in_clump, int) # i refers to position in list, pos. 0 means clump size 1
 
     virions_used = 0
 
     while (virions_used < total_virions):
-        # 173.884216 (init = 2450)
-        # std_1:   199.692402 (init = 100)
-        # amp_1:   0.92133552 (init = 0.995)
-        # skew_1:  3.56933583 (init = 0.995)
-        diameter = skewnorm.rvs(3.569, 173.884, 200, size=1)[0] # Best parameters so far
-        if (diameter < lb):
-            diameter = lb
-        elif (diameter > max(diameter_nz)):
-            diameter = max(diameter_nz)
-        
-        num_virions, virion_diam = GenClumpFromDiameter(diameter, mean, lb, ub, scheme=scheme, dist=dist)
-        
-        num_clumps_of_size_i[num_virions-1] += 1
+        virion_diam = GetVirionDiam(distribution, mean_virion_diam, lb_virion_diam, ub_virion_diam, std_virion_diam)
+        broken = False
+        err = 9999
+        while (err >= tolerance):
+            virions_in_clump = -999 # Put in scope
 
-        virions_used += num_virions
+            diameter = skewnorm.rvs(skew_clump_diam, mean_clump_diam, std_clump_diam, size=1)[0] # Best parameters so far
+            if (diameter < lb_virion_diam or (distribution=='fixed' and diameter <= 1.5*mean_virion_diam)):
+                virions_in_clump = 1
+                broken = True
+                break
+            elif (diameter > max(diameter_nz)):
+                diameter = max(diameter_nz)
+        
+            virions_in_clump = GetVirionsInClumpFromDiameter(scheme, diameter, virion_diam)
+
+            virions_in_clump_low = int(virions_in_clump)
+            virions_in_clump_hi = virions_in_clump_low + 1
+
+            err = min([abs(virions_in_clump - virions_in_clump_low), abs(virions_in_clump - virions_in_clump_hi)])
+
+        #print("broken=", broken, ", clump_diam=", diameter, ", vir=", virions_in_clump)
+        virions_in_clump = int(round(virions_in_clump))
+        num_clumps_of_size_i[virions_in_clump-1] += 1
+
+        virions_used += virions_in_clump
     # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     # print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
     #print("num_clumps_of_size_i=", num_clumps_of_size_i)
@@ -258,30 +274,48 @@ def CalcNumClumps(total_virions, mean, lb, ub, max_virions_in_clump, diameter_nz
 
     return num_clumps_of_size_i
 #====================================================================
-def GenClumpFromDiameter(diameter, mean, lb, ub, scheme='linear', dist='uniform', stdev=70, target_x=None, target_prob=0.004,
+def GenClumpFromDiameter(diameter, mean, lb, ub, scheme='linear', dist='uniform', stdev=35, target_x=None, target_prob=0.004,
                          tolerance=0.01):
     assert (scheme in ['linear', 'regular_polygon', 'sphere_packing']), "scheme must be 'linear', 'regular_polygon', or 'sphere_packing'."
-    assert (dist=='uniform' or dist=='normal'), "dist must be 'uniform' or 'normal'."
+    assert (dist in ['uniform', 'normal', 'fixed']), "dist must be 'uniform', 'normal' or 'fixed'."
     #----------------------------------------------------------------
-    err = 9999
-    while (err >= tolerance):
-        if (dist == 'uniform'):
-            virion_diam = np.random.uniform(lb, ub, 1)[0]
-            if (virion_diam >= diameter):
-                virions_in_clump = 1
-                break
+    if ((dist=='uniform') or (dist=='normal')):
+        err = 9999
+        while (err >= tolerance):
+            if (dist == 'uniform'):
+                virion_diam = np.random.uniform(lb, ub, 1)[0]
+                if (virion_diam >= diameter):
+                    virions_in_clump = 1
+                    break
 
-        elif (dist == 'normal'):
-            virion_diam = np.random.normal(mean, stdev, 1)[0]
-            if (virion_diam >= diameter):
-                virions_in_clump = 1
-                break
-            else:
-                if (virion_diam < lb):
-                    virion_diam = lb
-                elif (virion_diam > ub):
-                    virion_diam = ub
-        
+            elif (dist == 'normal'):
+                virion_diam = np.random.normal(mean, stdev, 1)[0]
+                if (virion_diam >= diameter):
+                    virions_in_clump = 1
+                    break
+                else:
+                    if (virion_diam < lb):
+                        virion_diam = lb
+                    elif (virion_diam > ub):
+                        virion_diam = ub
+            
+            if (scheme=='linear'):
+                virions_in_clump = diameter / virion_diam
+            elif (scheme=='regular_polygon'):
+                virions_in_clump = np.pi / np.arcsin(virion_diam / diameter)
+                #print("POLY:", virion_diam, diameter, np.arcsin(virion_diam / diameter), virions_in_clump)
+            elif (scheme=='sphere_packing'):
+                virions_in_clump = 0.64 * (diameter / virion_diam)**3
+            
+            virions_in_clump_low = int(virions_in_clump)
+            virions_in_clump_hi  = virions_in_clump_low + 1
+
+            err = min([abs(virions_in_clump - virions_in_clump_low), abs(virions_in_clump - virions_in_clump_hi)])
+
+            print("diam=", diameter, ", virion_diam=", round(virion_diam, 5), ", virions_in_clump=", round(virions_in_clump, 5), ", err=", round(err, 5))
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    elif (dist=='fixed'):
+        virion_diam = mean
         if (scheme=='linear'):
             virions_in_clump = diameter / virion_diam
         elif (scheme=='regular_polygon'):
@@ -289,18 +323,39 @@ def GenClumpFromDiameter(diameter, mean, lb, ub, scheme='linear', dist='uniform'
             #print("POLY:", virion_diam, diameter, np.arcsin(virion_diam / diameter), virions_in_clump)
         elif (scheme=='sphere_packing'):
             virions_in_clump = 0.64 * (diameter / virion_diam)**3
-        
-        virions_in_clump_low = int(virions_in_clump)
-        virions_in_clump_hi  = virions_in_clump_low + 1
-
-        err = min([abs(virions_in_clump - virions_in_clump_low), abs(virions_in_clump - virions_in_clump_hi)])
-
-        #print("diam=", diameter, ", virion_diam=", round(virion_diam, 5), ", virions_in_clump=", round(virions_in_clump, 5), ", err=", round(err, 5))
     #------------------------------------------------------------
     num_virions = round(virions_in_clump)
-    #print("diam=", diameter, ", virion_diam=", round(virion_diam, 5), ", virions_in_clump=", round(virions_in_clump, 5), ", err=", round(err, 5))
+    print("diam=", diameter, ", virion_diam=", round(virion_diam, 5), ", virions_in_clump=", round(virions_in_clump, 5), ", err=", round(err, 5))
     #----------------------------------------------------------------
     return num_virions, virion_diam
+
+#====================================================================
+def GetVirionDiam(distribution, mean_virion_diam=230, lb_virion_diam=150, ub_virion_diam=300, std_virion_diam=35):
+    if (distribution == 'uniform'):
+        virion_diam = np.random.uniform(lb_virion_diam, ub_virion_diam, 1)[0]
+
+    elif (distribution == 'normal'):
+        virion_diam = np.random.normal(mean_virion_diam, std_virion_diam, 1)[0]
+        if (virion_diam < lb_virion_diam):
+            virion_diam = lb_virion_diam
+        elif (virion_diam > ub_virion_diam):
+            virion_diam = ub_virion_diam
+    
+    elif (distribution=='fixed'):
+        virion_diam = mean_virion_diam
+    
+    return virion_diam
+#====================================================================
+def GetVirionsInClumpFromDiameter(scheme, diameter, virion_diam):
+    if (scheme=='linear'):
+        virions_in_clump = diameter / virion_diam
+    elif (scheme=='regular_polygon'):
+        virions_in_clump = np.pi / np.arcsin(virion_diam / diameter)
+        #print("POLY:", virion_diam, diameter, np.arcsin(virion_diam / diameter), virions_in_clump)
+    elif (scheme=='sphere_packing'):
+        virions_in_clump = 0.64 * (diameter / virion_diam)**3
+    
+    return virions_in_clump
 #====================================================================
 def Compensate(best_inf, Virion, kappa):
     #print("best_inf:", best_inf, type(best_inf), ",inf:", Virion.i, type(Virion.i), "k:", kappa, type(kappa))

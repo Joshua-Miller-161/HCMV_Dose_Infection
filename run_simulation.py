@@ -70,6 +70,8 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             dist_short = 'norm'
         elif (PARAM_DICT['distribution']=='uniform'):
             dist_short = 'uni'
+        elif (PARAM_DICT['distribution']=='fixed'):
+            dist_short = 'fix'
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         filename = ''
         if (simul_name == 'clump'):
@@ -149,6 +151,7 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'))
     #----------------------------------------------------------------
     elif (simul_name == 'acc_dam'):
+        print("AHHHHHHHHH     ACC DAM")
         if (save_path==None):
             save_path = os.path.join(os.getcwd(), 'simulation_results/acc_dam')
         filename = "AccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta']) # Specify filename
@@ -172,9 +175,9 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
                                                                   cell_count)
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             SimulResults = pd.DataFrame.from_dict(dict_)
-            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'_v2.csv'), index=False)
+            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'VAR_REMOVAL.csv'), index=False)
             print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-            print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'_v2.csv'))
+            print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'VAL_REMOVAL.csv'))
     #----------------------------------------------------------------    
     elif (simul_name == 'null'):
         if (save_path==None):

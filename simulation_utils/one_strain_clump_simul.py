@@ -58,7 +58,12 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
     ''' Simulate infections '''
     for init in range(len(GEN_WELL_DATA)): # Iterate thorugh each experiment
         print("=======================================================================")
-        print("GEN_WELL_DATA = ", GEN_WELL_DATA[init], " | Experiment ", init)
+        if (simul_name == 'clump'):
+            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme=", PARAM_DICT['scheme'])
+        elif (simul_name == 'clump_comp'):
+            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme=", PARAM_DICT['scheme'], "| kappa =", PARAM_DICT['kappa'])
+        elif (simul_name == 'clump_acc_dam'):
+            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme=", PARAM_DICT['scheme'], "| beta =", PARAM_DICT['beta'])
         print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ''' Set up virus and cell populations '''
@@ -72,8 +77,15 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
         # CLUMP_SIZES: 1,2,3,...,max clump size
         # radius: max clump size
         
-        CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], PARAM_DICT['mean'], PARAM_DICT['lb'], PARAM_DICT['ub'], 
-                                   max_virions_in_clump, diameter_nz, scheme=PARAM_DICT['scheme'], dist=PARAM_DICT['distribution'])
+        CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
+                                   max_virions_in_clump,
+                                   diameter_nz,
+                                   mean_virion_diam=PARAM_DICT['mean'], 
+                                   lb_virion_diam=PARAM_DICT['lb'], 
+                                   ub_virion_diam=PARAM_DICT['ub'],
+                                   scheme=PARAM_DICT['scheme'], 
+                                   distribution=PARAM_DICT['distribution'])
+        
         CLUMP_SIZES = np.arange(1, len(CLUMP_NUMS)+1)
         radius = len(CLUMP_NUMS)
 
@@ -96,74 +108,76 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
             CELL_POOL.append(Cell(False, 0, r, 0))
             #============================================================
             if (len(GFP_POOL) > 0):
-                num_interactions = np.random.poisson((len(GFP_POOL) / PARAM_DICT['vMax'])) # Calculate the number of clumps that will visit the cell
+                num_interactions = np.random.poisson((GEN_WELL_DATA[init] / PARAM_DICT['vMax'])) # Calculate the number of clumps that will visit the cell
                 
-                for a in range(int(num_interactions)):
-                    index = np.random.randint(0, len(GFP_POOL), size=1)[0] # Select a virion from the pool
-                    target_clump_id = GFP_POOL[index].num
+                VIRIONS_IN_CURR_CLUMP = []
+                VIRIONS_IN_CURR_CLUMP_IDX = []
+                TO_REMOVE_IDX = []
+                
+                if (num_interactions > 0):
+                    for a in range(int(num_interactions)):
+                        index = np.random.randint(0, len(GFP_POOL), size=1)[0] # Select a virion from the pool
+                        target_clump_id = GFP_POOL[index].num
 
-                    VIRIONS_IN_CURR_CLUMP = []
-                    VIRIONS_IN_CURR_CLUMP_IDX = []
-                    TO_REMOVE_IDX = []
-                    for aa in range(index - radius, index + radius + 1):
-                        if ((aa >= 0) and (aa < len(GFP_POOL))): 
-                            #print("aa:", aa, ", curr ID:", GFP_POOL[aa].num,",targ. ID:", target_clump_id,",idx:", index, ", int.:", num_interactions, ", rad:", radius, ", a:",a,",cell_num:",cell_num, "vir_left:", len(GFP_POOL))
-                            if (GFP_POOL[aa].num == target_clump_id): # Find virions with the same clump ID number
-                                VIRIONS_IN_CURR_CLUMP.append(GFP_POOL[aa])
-                                VIRIONS_IN_CURR_CLUMP_IDX.append(aa)
-                    # - - - - - - - - - - - - - - - - - - - - - - - -
-                    # Vanilla clump simulation
-                    if (simul_name == 'clump'):
-                        for aaa in range(len(VIRIONS_IN_CURR_CLUMP)):
-                            is_successful = Innoculation(VIRIONS_IN_CURR_CLUMP[aaa], 
-                                                         CELL_POOL[cell_num], 
-                                                         PARAM_DICT['gamma'])
-                            total += 1
-                            if is_successful:
-                                TO_REMOVE_IDX.append(VIRIONS_IN_CURR_CLUMP_IDX[aaa])
-                        #print("TO_REMOVE_IDX=", TO_REMOVE_IDX, ", len(GFP_POOL)=", len(GFP_POOL))
-                    # - - - - - - - - - - - - - - - - - - - - - - - -
-                    # Clumps + Compensation
-                    elif (simul_name == 'clump_comp'):
-                        best_inf = -10000
-                        for idx in range(len(VIRIONS_IN_CURR_CLUMP)):
-                            if (VIRIONS_IN_CURR_CLUMP[idx].i > best_inf):
-                                best_inf = VIRIONS_IN_CURR_CLUMP[idx].i
+                        for aa in range(index - radius, index + radius + 1):
+                            if ((aa >= 0) and (aa < len(GFP_POOL))): 
+                                #print("aa:", aa, ", curr ID:", GFP_POOL[aa].num,",targ. ID:", target_clump_id,",idx:", index, ", int.:", num_interactions, ", rad:", radius, ", a:",a,",cell_num:",cell_num, "vir_left:", len(GFP_POOL))
+                                if (GFP_POOL[aa].num == target_clump_id): # Find virions with the same clump ID number
+                                    VIRIONS_IN_CURR_CLUMP.append(GFP_POOL[aa])
+                                    VIRIONS_IN_CURR_CLUMP_IDX.append(aa)
+                        # - - - - - - - - - - - - - - - - - - - - - - - -
+                        # Vanilla clump simulation
+                        if (simul_name == 'clump'):
+                            for aaa in range(len(VIRIONS_IN_CURR_CLUMP)):
+                                is_successful = Innoculation(VIRIONS_IN_CURR_CLUMP[aaa], 
+                                                            CELL_POOL[cell_num], 
+                                                            PARAM_DICT['gamma'])
+                                total += 1
+                                if is_successful:
+                                    TO_REMOVE_IDX.append(VIRIONS_IN_CURR_CLUMP_IDX[aaa])
+                            #print("TO_REMOVE_IDX=", TO_REMOVE_IDX, ", len(GFP_POOL)=", len(GFP_POOL))
+                        # - - - - - - - - - - - - - - - - - - - - - - - -
+                        # Clumps + Compensation
+                        elif (simul_name == 'clump_comp'):
+                            best_inf = -10000
+                            for idx in range(len(VIRIONS_IN_CURR_CLUMP)):
+                                if (VIRIONS_IN_CURR_CLUMP[idx].i > best_inf):
+                                    best_inf = VIRIONS_IN_CURR_CLUMP[idx].i
 
-                        for aaa in range(len(VIRIONS_IN_CURR_CLUMP)):
-                            VIRIONS_IN_CURR_CLUMP[aaa].i = Compensate(best_inf, VIRIONS_IN_CURR_CLUMP[aaa], PARAM_DICT['kappa'])
-                            is_successful = Innoculation(VIRIONS_IN_CURR_CLUMP[aaa], 
-                                                         CELL_POOL[cell_num], 
-                                                         PARAM_DICT['gamma'])
-                            total += 1
-                            #print("aaa=", aaa, TO_REMOVE_IDX[aaa], "len(GFP_POOL)=", len(GFP_POOL))
-                            if is_successful:
-                                TO_REMOVE_IDX.append(VIRIONS_IN_CURR_CLUMP_IDX[aaa])
-                    # - - - - - - - - - - - - - - - - - - - - - - - -
-                    # Clumps + Accrued damage
-                    elif (simul_name == 'clump_acc_dam'): 
-                        for aaa in range(len(VIRIONS_IN_CURR_CLUMP)):
-                            is_successful = Innoculation(VIRIONS_IN_CURR_CLUMP[aaa], 
-                                                         CELL_POOL[cell_num], 
-                                                         gamma=PARAM_DICT['gamma'], 
-                                                         acc_dam=True, 
-                                                         beta=PARAM_DICT['beta'])
+                            for aaa in range(len(VIRIONS_IN_CURR_CLUMP)):
+                                VIRIONS_IN_CURR_CLUMP[aaa].i = Compensate(best_inf, VIRIONS_IN_CURR_CLUMP[aaa], PARAM_DICT['kappa'])
+                                is_successful = Innoculation(VIRIONS_IN_CURR_CLUMP[aaa], 
+                                                            CELL_POOL[cell_num], 
+                                                            PARAM_DICT['gamma'])
+                                total += 1
+                                #print("aaa=", aaa, TO_REMOVE_IDX[aaa], "len(GFP_POOL)=", len(GFP_POOL))
+                                if is_successful:
+                                    TO_REMOVE_IDX.append(VIRIONS_IN_CURR_CLUMP_IDX[aaa])
+                        # - - - - - - - - - - - - - - - - - - - - - - - -
+                        # Clumps + Accrued damage
+                        elif (simul_name == 'clump_acc_dam'):
+                            for aaa in range(len(VIRIONS_IN_CURR_CLUMP)):
+                                is_successful = Innoculation(VIRIONS_IN_CURR_CLUMP[aaa], 
+                                                            CELL_POOL[cell_num], 
+                                                            gamma=PARAM_DICT['gamma'], 
+                                                            acc_dam=True, 
+                                                            beta=PARAM_DICT['beta'])
 
-                            total += 1
-                            if is_successful:
-                                TO_REMOVE_IDX.append(VIRIONS_IN_CURR_CLUMP_IDX[aaa])    
-                                #print("----- match ----- inf:", is_successful, ",len:", len(GFP_POOL))
-                    # - - - - - - - - - - - - - - - - - - - - - - - -
-                    # Remove virions which successfully infected from pool
-                    TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
+                                total += 1
+                                if is_successful:
+                                    TO_REMOVE_IDX.append(VIRIONS_IN_CURR_CLUMP_IDX[aaa])    
+                                    #print("----- match ----- inf:", is_successful, ",len:", len(GFP_POOL))
+                        # - - - - - - - - - - - - - - - - - - - - - - - -
+                        # Remove virions which successfully infected from pool
+                        TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
 
-                    for idx in range(len(TO_REMOVE_IDX)):
-                        if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
-                            print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
-                            break
-                        else:
-                            #print("idx=",idx,", idx=", TO_REMOVE_IDX[idx], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
-                            GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[idx]])                        
+                        for idx in range(len(TO_REMOVE_IDX)):
+                            if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
+                                print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
+                                break
+                            else:
+                                #print("idx=",idx,", idx=", TO_REMOVE_IDX[idx], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
+                                GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[idx]])                        
             #--------------------------------------------------------
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")
@@ -176,7 +190,7 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
         #print(" + + + + + + + + + + + + + + ")
         #print(str(GEN_WELL_DATA[init]), ":", CLUMP_DICT[str(GEN_WELL_DATA[init])])
         #print(" + + + + + + + + + + + + + + ")
-        print("num infG = ", num_infG, "| cell_count = ", cell_count, "| Interactions / cell = ", round(total / cell_count, 5), "| len(GFP_POOL)=", len(GFP_POOL))
+        print("num infG = ", num_infG, "| cell_count = ", cell_count, "| avg. inter/cell = ", round(total / cell_count, 5), "| len(GFP_POOL)=", len(GFP_POOL))
         #============================================================
         INF_WELL_SIMUL[init] = num_infG
     #----------------------------------------------------------------

@@ -15,7 +15,7 @@ from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell
 #====================================================================
 ''' Get simulation data '''
 
-file = 'simulation_results/null/NullSimul_2022_11_02_TB_GFP_fib_s=50_vMax=800.0_b=0.1_n=5.csv'
+file = 'simulation_results/acc_dam/AccDamSimul_2021_07_13 GFP_TB_fibroblast_s=100_vMax=700.0_b=-0.8_n=1REMOVAL.csv'
 df_simul = pd.read_csv(file)
 #--------------------------------------------------------------------
 PARAM_DICT_SIMUL = ExtractParams(df_simul)
@@ -57,9 +57,6 @@ cell_count = int(PARAM_DICT_DATA['cell_count'] / scale)
 ''' Create figure '''
 
 fig = plt.figure(figsize=(6, 6), dpi=100, constrained_layout=False)
-#====================================================================
-PARAM_DICT_DATA = ExtractParams(df_data)
-cell_count = int(PARAM_DICT_DATA['cell_count'] / scale)
 #====================================================================
 with open('config.yml', 'r') as c:
     config = yaml.load(c, Loader=yaml.FullLoader)
@@ -129,7 +126,7 @@ n_simul = result_simul.params['n'].value
 #g2 = result_simul_low.params['gamma'].value
 #n2 = result_simul_low.params['n'].value
 
-print("g_data = ", round(g_data,5), ", n_data = ", round(n_data,5), ", g_simul = ", round(g_simul,5), ", n_simul = ", round(n_simul,5))#, ", g2 = ", g2, ", n2 = ", n2)
+print("g_data = ", round(g_data,5), ", n_data = ", round(n_data,5), ", g_simul = ", round(g_simul,5), ", n_simul = ", round(n_simul,5), 'cell_count =', cell_count)#, ", g2 = ", g2, ", n2 = ", n2)
 
 x_data = GEN_CELL_DATA
 y_data = model(x_data, result_data.params)
@@ -207,7 +204,7 @@ if ('clump' in simul_name):
 elif (simul_name == 'acc_dam'):
     plt.text(1.1 * xMin, .08 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta))
     plt.text(1.1 * xMin, .04 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
-    plt.title(SHEET_NAMES[sheet] + ' | Acc. Damage')
+    plt.title(SHEET_NAMES[sheet] + ' | Acc. Damage' + '\nREMOVAL')
 
 elif (simul_name == 'comp'):
     plt.text(1.1 * xMin, .08 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa))
@@ -239,6 +236,8 @@ if ('clump' in simul_name):
         dist_short = 'norm'
     elif (distribution=='uniform'):
         dist_short = 'uni'
+    elif (distribution=='fixed'):
+        dist_short = 'fix'
     
     if (simul_name == 'clump'):
         filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_"+scheme_short+"_"+dist_short+"_n="+str(num_simulations) # Specify filename
@@ -256,4 +255,4 @@ elif (simul_name == 'comp'):
 elif (simul_name == 'null'):
     filename = "NullSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(b)+"_n="+str(num_simulations) 
 
-fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+"REMOVAL.pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
