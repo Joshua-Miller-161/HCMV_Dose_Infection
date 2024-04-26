@@ -10,7 +10,7 @@ def SimulateNull(GEN_WELL_DATA, PARAM_DICT, cell_count):
     #----------------------------------------------------------------
     for init in range(len(GEN_WELL_DATA)): # Iterate thorugh each experiment
         print("=======================================================================")
-        print(PARAM_DICT['simul_name'], ", GEN_WELL_DATA[",init,"] =", GEN_WELL_DATA[init], " gamma =", PARAM_DICT['gamma'], ", vMax =", PARAM_DICT['vMax'], ", b =", PARAM_DICT['b'])
+        print(PARAM_DICT['simul_name'], ", GEN_WELL_DATA[",init,"] =", GEN_WELL_DATA[init], "| gamma =", PARAM_DICT['gamma'], "| vMax =", PARAM_DICT['vMax'], "| b =", PARAM_DICT['b'], "| scale =", PARAM_DICT['scale'])
         print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ''' Set up virus and cell populations '''

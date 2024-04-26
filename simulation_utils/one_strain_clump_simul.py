@@ -59,11 +59,11 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
     for init in range(len(GEN_WELL_DATA)): # Iterate thorugh each experiment
         print("=======================================================================")
         if (simul_name == 'clump'):
-            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme=", PARAM_DICT['scheme'])
+            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme =", PARAM_DICT['scheme'], "| scale =", PARAM_DICT['scale'])
         elif (simul_name == 'clump_comp'):
-            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme=", PARAM_DICT['scheme'], "| kappa =", PARAM_DICT['kappa'])
+            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme =", PARAM_DICT['scheme'], "| kappa =", PARAM_DICT['kappa'], "| scale =", PARAM_DICT['scale'])
         elif (simul_name == 'clump_acc_dam'):
-            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme=", PARAM_DICT['scheme'], "| beta =", PARAM_DICT['beta'])
+            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme =", PARAM_DICT['scheme'], "| beta =", PARAM_DICT['beta'], "| scale =", PARAM_DICT['scale'])
         print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ''' Set up virus and cell populations '''
