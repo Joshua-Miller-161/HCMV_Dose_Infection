@@ -11,11 +11,11 @@ sys.path.append(os.getcwd())
 
 from misc.misc_utils import ExtractParams
 from simulation_utils.utils import PrepareData
-from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell
+from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell, MakeDataPretty, MakeFilename
 #====================================================================
 ''' Get simulation data '''
 
-file = 'simulation_results/comp/CompSimul_2021_07_13 GFP_TB_fibroblast_s=50_vMax=1600.0_k=-0.03_r=1_n=10.csv'
+file = 'simulation_results/comp/CompSimul_2022_11_02_TB_GFP_fib_s=50_vMax=800.0_k=-3.0_r=1_n=3.csv'
 df_simul = pd.read_csv(file)
 #--------------------------------------------------------------------
 PARAM_DICT_SIMUL = ExtractParams(df_simul)
@@ -58,7 +58,7 @@ cell_count = int(PARAM_DICT_DATA['cell_count'] / scale)
 #====================================================================
 ''' Create figure '''
 
-fig = plt.figure(figsize=(6, 6), dpi=100, constrained_layout=False)
+fig, ax = plt.subplots(1, 1, figsize=(6, 6), dpi=100, constrained_layout=False)
 #====================================================================
 with open('config.yml', 'r') as c:
     config = yaml.load(c, Loader=yaml.FullLoader)
@@ -86,37 +86,23 @@ band_type = config['PLOTTING']['band_type']
 #====================================================================
 ''' Prepare experimental and simulation data for plotting '''
 
-GEN_WELL_SIMUL  = np.asarray(df_simul.loc[:, 'GFP genomes (scaled)'])
-GEN_CELL_SIMUL  = GEN_WELL_SIMUL / cell_count
-INF_WELL_SIMULS = np.empty((num_simulations, df_simul.shape[0]), float)
+GEN_WELL_SIMUL = np.asarray(df_simul.loc[:, 'GFP genomes (scaled)'])
+GEN_CELL_SIMUL = GEN_WELL_SIMUL / cell_count
+INF_WELL_SIMUL = np.empty((num_simulations, df_simul.shape[0]), float)
 
 for i in range(num_simulations):
-    INF_WELL_SIMULS[i, :] = df_simul.loc[:, 'GFP IU run='+str(i)]
+    INF_WELL_SIMUL[i, :] = df_simul.loc[:, 'GFP IU run='+str(i)]
 
-print("||||||", np.shape(INF_WELL_SIMULS), np.shape(np.mean(INF_WELL_SIMULS, axis=0)), "|||||||")
+print("||||||", np.shape(INF_WELL_SIMUL), np.shape(np.mean(INF_WELL_SIMUL, axis=0)), "|||||||")
 
-INF_WELL_SIMULS_MEAN = np.mean(INF_WELL_SIMULS, axis=0)
-INF_CELL_SIMULS_MEAN = INF_WELL_SIMULS.ravel() / cell_count
-
-INF_WELL_SIMULS_STDEVS = np.std(INF_WELL_SIMULS, axis=0)
-CIS = (1.96 * np.ones(np.shape(INF_WELL_SIMULS)[1])) * INF_WELL_SIMULS_STDEVS / (np.sqrt(np.shape(INF_WELL_SIMULS)[0]) * np.ones(np.shape(INF_WELL_SIMULS)[1]))
-
-MAXS = np.amax(INF_WELL_SIMULS, axis=0)
-MINS = np.amin(INF_WELL_SIMULS, axis=0)
-
+INF_WELL_SIMUL_MEAN = np.mean(INF_WELL_SIMUL, axis=0)
+INF_CELL_SIMUL_MEAN = INF_WELL_SIMUL.ravel() / cell_count
 #--------------------------------------------------------------------
-GEN_WELL_SIMUL_U, INF_WELL_SIMULS_U = CombineSameGenWell(GEN_WELL_SIMUL, INF_WELL_SIMULS)
+GEN_WELL_SIMUL_U, INF_WELL_SIMUL_U, CIS_U, MINS_U, MAXS_U = MakeDataPretty(df_simul, 'GFP genomes (scaled)', 'GFP IU', num_simulations)
 
-INF_WELL_SIMULS_MEAN_U = np.mean(INF_WELL_SIMULS_U, axis=1)
-INF_CELL_SIMULS_MEAN_U = INF_WELL_SIMULS_MEAN_U.ravel() / cell_count
-
-INF_WELL_SIMULS_STDEVS_U = np.std(INF_WELL_SIMULS_U, axis=1)
-CIS_U = (1.96 * np.ones(np.shape(INF_WELL_SIMULS_U)[0])) * INF_WELL_SIMULS_STDEVS_U / (np.sqrt(np.shape(INF_WELL_SIMULS_U)[1]) * np.ones(np.shape(INF_WELL_SIMULS_U)[0]))
-
-MAXS_U = np.amax(INF_WELL_SIMULS_U, axis=1)
-MINS_U = np.amin(INF_WELL_SIMULS_U, axis=1)
-
-print(np.shape(GEN_WELL_SIMUL_U), np.shape(INF_WELL_SIMULS_U), np.shape(INF_WELL_SIMULS_MEAN_U), np.shape(MAXS_U), np.shape(CIS_U))
+GEN_CELL_SIMUL_U      = GEN_WELL_SIMUL_U / cell_count
+INF_WELL_SIMUL_MEAN_U = np.mean(INF_WELL_SIMUL_U, axis=1)
+INF_CELL_SIMUL_MEAN_U = INF_WELL_SIMUL_MEAN_U.ravel() / cell_count
 #--------------------------------------------------------------------
 GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros = PrepareData(df_data, scale)
 #====================================================================
@@ -129,7 +115,7 @@ result_data  = minimize(negLogLikeModel, params, method = 'differential_evolutio
 report_fit(result_data)
 print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
 print("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=")
-result_simul = minimize(negLogLikeModel, params, method = 'differential_evolution', args=(GEN_CELL_SIMUL[LOWERS[sheet]:UPPERS[sheet]], INF_CELL_SIMULS_MEAN[LOWERS[sheet]:UPPERS[sheet]]),)
+result_simul = minimize(negLogLikeModel, params, method = 'differential_evolution', args=(GEN_CELL_SIMUL[LOWERS[sheet]:UPPERS[sheet]], INF_CELL_SIMUL_MEAN[LOWERS[sheet]:UPPERS[sheet]]),)
 report_fit(result_simul)
 print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
 g_data = result_data.params['gamma'].value
@@ -151,36 +137,36 @@ print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=
 print("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=")
 #====================================================================
 ''' Replace values of 0 with a replacement value '''
-print("AHHHHHHHH ", np.shape(INF_WELL_SIMULS_U), np.shape(INF_WELL_SIMULS_MEAN_U))
-for i in range(np.shape(INF_WELL_SIMULS_MEAN_U)[0]):
+print("AHHHHHHHH ", np.shape(INF_WELL_SIMUL_U), np.shape(INF_WELL_SIMUL_MEAN_U))
+for i in range(np.shape(INF_WELL_SIMUL_MEAN_U)[0]):
     if (band_type == 'minmax'):
         if (MINS_U[i] <= 0):
             MINS_U[i] = replacement_val * cell_count
 
     elif (band_type == 'CIs'):
-        if (INF_WELL_SIMULS_MEAN_U[i] <= 0):
-            INF_WELL_SIMULS_MEAN_U[i] = replacement_val * cell_count
+        if (INF_WELL_SIMUL_MEAN_U[i] <= 0):
+            INF_WELL_SIMUL_MEAN_U[i] = replacement_val * cell_count
 #====================================================================
 ''' Plot data and simulation results and best fit curves '''
 
-plt.scatter(GEN_CELL_DATA, INF_CELL_DATA, s=80, facecolors=color, edgecolors='none', marker=marker, alpha=.3)
-plt.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]], 'b-.', linewidth = 2)
+ax.scatter(GEN_CELL_DATA, INF_CELL_DATA, s=80, facecolors=color, edgecolors='none', marker=marker, alpha=.3)
+ax.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]], 'b-.', linewidth = 2)
 #--------------------------------------------------------------------
 if (num_simulations == 1):
-    plt.scatter(GEN_CELL_SIMUL, INF_CELL_SIMULS_MEAN.ravel(), s=80, facecolors='none', edgecolors=color, marker=marker)
+    ax.scatter(GEN_CELL_SIMUL, INF_WELL_SIMUL_MEAN.ravel() / cell_count, s=80, facecolors='none', edgecolors=color, marker=marker)
 
 elif (num_simulations > 1):
     if (band_type == 'minmax'):
-        plt.fill_between(GEN_WELL_SIMUL_U / cell_count, MINS_U / cell_count, MAXS_U / cell_count, color='black', alpha=.3)
+        ax.fill_between(GEN_WELL_SIMUL_U / cell_count, MINS_U / cell_count, MAXS_U / cell_count, color='black', alpha=.3)
     elif (band_type == 'CIs'):
-        plt.fill_between(GEN_WELL_SIMUL_U / cell_count, (INF_WELL_SIMULS_MEAN_U - CIS_U) / cell_count, (INF_WELL_SIMULS_MEAN_U + CIS_U) / cell_count, color='black', alpha=.3)
+        ax.fill_between(GEN_WELL_SIMUL_U / cell_count, (INF_WELL_SIMUL_MEAN_U - CIS_U) / cell_count, (INF_WELL_SIMUL_MEAN_U + CIS_U) / cell_count, color='black', alpha=.3)
 
-    plt.plot(GEN_WELL_SIMUL_U / cell_count, INF_CELL_SIMULS_MEAN_U, color='black', linestyle='-')
+    ax.plot(GEN_WELL_SIMUL_U / cell_count, INF_CELL_SIMUL_MEAN_U, color='black', linestyle='-')
 
-plt.plot(x_simul[LOWERS[sheet]:UPPERS[sheet]], y_simul[LOWERS[sheet]:UPPERS[sheet]], 'r--', linewidth = 2)
+ax.plot(x_simul[LOWERS[sheet]:UPPERS[sheet]], y_simul[LOWERS[sheet]:UPPERS[sheet]], 'r--', linewidth = 2)
 
-#plt.scatter(GEN_CELL_DATA, INF_CELL_DATA, s=80, facecolors='green', edgecolors='none', marker='s')
-#plt.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]], color='pink', linestyle='-.', linewidth = 2)
+#ax.scatter(GEN_CELL_DATA, INF_CELL_DATA, s=80, facecolors='green', edgecolors='none', marker='s')
+#ax.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]], color='pink', linestyle='-.', linewidth = 2)
 #====================================================================
 ''' Formatting '''
 legendD = mlines.Line2D([], [], color='b', linestyle='-.', markerfacecolor=color, markeredgecolor='none', markerfacecoloralt='none', marker=marker, alpha=0.6,
@@ -197,14 +183,14 @@ xMax = 10**3
 yMin = 10**-6
 yMax = 1
 
-plt.legend(handles = [legendD, legendS], loc='upper left', prop={'size': 8})
-plt.plot(np. linspace(xMin,xMax), np.linspace(yMin, yMax), 'k--', linewidth = 1)
-plt.xlabel('Genomes/cell')
-plt.ylabel('Infections/cell')
-plt.xscale('log')
-plt.yscale('log')
-plt.xlim(xMin, xMax)
-plt.ylim(yMin, yMax)
+ax.legend(handles = [legendD, legendS], loc='upper left', prop={'size': 8})
+ax.plot(np. linspace(xMin,xMax), np.linspace(yMin, yMax), 'k--', linewidth = 1)
+ax.set_xlabel('Genomes/cell')
+ax.set_ylabel('Infections/cell')
+ax.set_xscale('log')
+ax.set_yscale('log')
+ax.set_xlim(xMin, xMax)
+ax.set_ylim(yMin, yMax)
 #--------------------------------------------------------------------
 remove_str = ''
 if (PARAM_DICT_SIMUL['remove'] == 1):
@@ -214,69 +200,97 @@ elif (PARAM_DICT_SIMUL['remove'] == 0):
 
 if ('clump' in simul_name):
     if (simul_name == 'clump'):
-        plt.title(SHEET_NAMES[sheet] + ' | Clumping')
-        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+"\n"+remove_str)
+        ax.set_title(SHEET_NAMES[sheet] + ' | Clumping')
+        ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+"\n"+remove_str)
     elif (simul_name == 'clump_comp'):
-        plt.title(SHEET_NAMES[sheet] + ' | Clumping + Compensation')
-        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa])+"\n"+remove_str)
+        ax.set_title(SHEET_NAMES[sheet] + ' | Clumping + Compensation')
+        ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa])+"\n"+remove_str)
     elif (simul_name == 'clump_acc_dam'):
-        plt.title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
-        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
-    plt.text(1.1 * xMin, .05 * yMax, scheme)
-    plt.text(1.1 * xMin, .025 * yMax, distribution)
+        ax.set_title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
+        ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
+    ax.text(1.1 * xMin, .05 * yMax, scheme)
+    ax.text(1.1 * xMin, .025 * yMax, distribution)
 
 elif (simul_name == 'acc_dam'):
-    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta)+"\n"+remove_str)
-    plt.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
-    plt.title(SHEET_NAMES[sheet] + ' | Acc. Damage')
+    ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta)+"\n"+remove_str)
+    ax.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
+    ax.set_title(SHEET_NAMES[sheet] + ' | Acc. Damage')
 
 elif (simul_name == 'comp'):
-    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa)+"\n"+remove_str)
-    plt.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
-    plt.title(SHEET_NAMES[sheet] + ' | Compensation')
+    ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa)+"\n"+remove_str)
+    ax.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
+    ax.set_title(SHEET_NAMES[sheet] + ' | Compensation')
 
 elif (simul_name == 'null'):
-    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b'])+"\n"+remove_str)
-    plt.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}+b$')
-    plt.title(SHEET_NAMES[sheet] + ' | Null')
+    ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b'])+"\n"+remove_str)
+    ax.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}+b$')
+    ax.set_title(SHEET_NAMES[sheet] + ' | Null')
 
-plt.text(.6 * xMin, 2.2 * yMax, '', fontsize=16, fontweight='bold', va='top', ha='right')
-#====================================================================
-plt.show()
+ax.text(.6 * xMin, 2.2 * yMax, '', fontsize=16, fontweight='bold', va='top', ha='right')
 #====================================================================
 ''' Save figure '''
-filename = ''
-if ('clump' in simul_name):
-    scheme_short = ''
-    if (PARAM_DICT_SIMUL['scheme']=='linear'):
-        scheme_short='lin'
-    elif (PARAM_DICT_SIMUL['scheme']=='regular_polygon'):
-        scheme_short='poly'
-    elif (PARAM_DICT_SIMUL['scheme']=='sphere_packing'):
-        scheme_short='sp'
+filename = MakeFilename(PARAM_DICT_SIMUL, SHEET_NAMES[sheet])
+fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+#====================================================================
+''' Create figure '''
+fig2, ax2 = plt.subplots(1,1,figsize=(6, 6), dpi=100, constrained_layout=False)
+#--------------------------------------------------------------------
+GEN_WELL_SIMUL_U, INTER_U, CIS_U, MINS_U, MAXS_U = MakeDataPretty(df_simul, 'GFP genomes (scaled)', 'total_interactions', num_simulations)
 
-    dist_short = ''
-    if (distribution=='normal'):
-        dist_short = 'norm'
-    elif (distribution=='uniform'):
-        dist_short = 'uni'
-    elif (distribution=='fixed'):
-        dist_short = 'fix'
-    
+INTER_CELL = np.mean(INTER_U, axis=1) / cell_count
+INTER_WELL = np.mean(INTER_U, axis=1)  / GEN_WELL_SIMUL_U
+
+ax2.plot(GEN_WELL_SIMUL_U / cell_count, INTER_CELL,label='interactions / cell_count')
+ax2.plot(GEN_WELL_SIMUL_U / cell_count, INTER_WELL, label='interactions / GENOMES/WELL')
+#--------------------------------------------------------------------
+xMin = 10**-3
+xMax = 10**3
+yMin = 10**(int(np.log10(min([min(INTER_CELL), min(INTER_WELL)])))-1)
+yMax = 10**(int(np.log10(max([max(INTER_CELL), max(INTER_WELL)]))) + 1)
+
+ax2.set_xlabel('Genomes/cell')
+ax2.set_ylabel('Avg. interactions')
+ax2.set_xscale('log')
+ax2.set_yscale('log')
+ax2.set_xlim(xMin, xMax)
+ax2.set_ylim(yMin, yMax)
+ax2.legend(loc='upper left')
+
+remove_str = ''
+if (PARAM_DICT_SIMUL['remove'] == 1):
+    remove_str = 'Successful virions\nremoved'
+elif (PARAM_DICT_SIMUL['remove'] == 0):
+    remove_str = 'Successful virions\nleft in'
+
+if ('clump' in simul_name):
     if (simul_name == 'clump'):
-        filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations) # Specify filename
+        ax2.set_title(SHEET_NAMES[sheet] + ' | Clumping')
+        ax2.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+"\n"+remove_str)
     elif (simul_name == 'clump_comp'):
-        filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_k="+str(PARAM_DICT_SIMUL['kappa'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations) # Specify filename
+        ax2.set_title(SHEET_NAMES[sheet] + ' | Clumping + Compensation')
+        ax2.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa])+"\n"+remove_str)
     elif (simul_name == 'clump_acc_dam'):
-        filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(PARAM_DICT_SIMUL['beta'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations) # Specify filename
+        ax2.set_title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
+        ax2.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
+    ax2.text(1.1 * xMin, .05 * yMax, scheme)
+    ax2.text(1.1 * xMin, .025 * yMax, distribution)
 
 elif (simul_name == 'acc_dam'):
-    filename = "AccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(beta)+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations)
+    ax2.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta)+"\n"+remove_str)
+    ax2.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
+    ax2.set_title(SHEET_NAMES[sheet] + ' | Acc. Damage')
 
 elif (simul_name == 'comp'):
-    filename = "CompSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_k="+str(kappa)+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations)
+    ax2.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa)+"\n"+remove_str)
+    ax2.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
+    ax2.set_title(SHEET_NAMES[sheet] + ' | Compensation')
 
 elif (simul_name == 'null'):
-    filename = "NullSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(b)+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations) 
-
-#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+    ax2.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b'])+"\n"+remove_str)
+    ax2.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}+b$')
+    ax2.set_title(SHEET_NAMES[sheet] + ' | Null')
+#====================================================================
+''' Save figure '''
+filename = MakeFilename(PARAM_DICT_SIMUL, SHEET_NAMES[sheet])
+fig2.savefig(os.path.join(os.path.join(os.getcwd(), 'figs/interaction_figs'), "INTER_"+filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+plt.show()

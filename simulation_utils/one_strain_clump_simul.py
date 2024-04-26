@@ -9,7 +9,8 @@ from misc.misc_utils import FlattenMeans, Trapezoid
 def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_name, save_clump_info=False):
     assert simul_name in ['clump', 'clump_comp', 'clump_acc_dam'], simul_name+" must be: 'clump', 'clump_acc_dam', 'clump_comp'."
     #----------------------------------------------------------------
-    INF_WELL_SIMUL = np.empty(GEN_WELL_DATA.shape[0], int)
+    INF_WELL_SIMUL     = np.empty(GEN_WELL_DATA.shape[0], int)
+    TOTAL_INTERACTIONS = np.empty(GEN_WELL_DATA.shape[0], int)
     #----------------------------------------------------------------
     ''' Prepare information for clumps '''
     if save_clump_info:
@@ -103,19 +104,21 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
             GFP_POOL.append(Virion(i, True, CLUMP_IDS[j])) # Assign each viron with an infectivity, marker, and clump ID
         #================================================================
         for cell_num in range(cell_count):
+            #print(" == == == ==", cell_num, "== == == ==")
             #print(" + + + Cell number ", k, "+ + +")
             r = np.random.normal(PARAM_DICT['r_mean'], PARAM_DICT['r_stdev'])
             CELL_POOL.append(Cell(False, 0, r, 0))
             #============================================================
             if (len(GFP_POOL) > 0):
-                num_interactions = np.random.poisson((GEN_WELL_DATA[init] / PARAM_DICT['vMax'])) # Calculate the number of clumps that will visit the cell
+                num_clump_interactions = np.random.poisson((GEN_WELL_DATA[init] / PARAM_DICT['vMax'])) # Calculate the number of clumps that will visit the cell
                 
-                VIRIONS_IN_CURR_CLUMP = []
-                VIRIONS_IN_CURR_CLUMP_IDX = []
-                TO_REMOVE_IDX = []
-                
-                if (num_interactions > 0):
-                    for a in range(int(num_interactions)):
+                if (num_clump_interactions > 0):
+                    for _ in range(int(num_clump_interactions)):
+                        VIRIONS_IN_CURR_CLUMP = []
+                        VIRIONS_IN_CURR_CLUMP_IDX = []
+                        TO_REMOVE_IDX = []
+
+                        #print(" -- -- -- --", num_interactions, a, "-- -- -- --")
                         index = np.random.randint(0, len(GFP_POOL), size=1)[0] # Select a virion from the pool
                         target_clump_id = GFP_POOL[index].num
 
@@ -179,7 +182,11 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
                                 else:
                                     #print("idx=",idx,", idx=", TO_REMOVE_IDX[idx], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
                                     #GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[idx]]) works but slow
+                                    #print("cell_num=", cell_num, ", len(GFP)=", len(GFP_POOL), ", len(REMOVE)=", len(TO_REMOVE_IDX), ", idx=", idx, ", r_idx=", TO_REMOVE_IDX[idx])
                                     del GFP_POOL[TO_REMOVE_IDX[idx]]
+
+                        if (cell_num == 0 or cell_num == 500 or cell_num == 1500 or cell_num == 2299):
+                            print("cell=", cell_num, ", poisson:", num_clump_interactions, ",len(CURR_CLUMP):", len(VIRIONS_IN_CURR_CLUMP), ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total/cell:", round(total/cell_count, 5))
             #--------------------------------------------------------
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")
@@ -192,11 +199,13 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
         #print(" + + + + + + + + + + + + + + ")
         #print(str(GEN_WELL_DATA[init]), ":", CLUMP_DICT[str(GEN_WELL_DATA[init])])
         #print(" + + + + + + + + + + + + + + ")
-        print("num infG = ", num_infG, "| cell_count = ", cell_count, "| avg. inter/cell = ", round(total / cell_count, 5), "| len(GFP_POOL)=", len(GFP_POOL))
-        #============================================================
-        INF_WELL_SIMUL[init] = num_infG
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        print("num infG =", num_infG, "| cell_count =", cell_count, "| avg. inter/cell =", round(total / cell_count, 4), "| avg. inter/virion =", round(total / GEN_WELL_DATA[init], 4))
+        
+        INF_WELL_SIMUL[init]     = num_infG
+        TOTAL_INTERACTIONS[init] = total
     #----------------------------------------------------------------
     if save_clump_info:
-        return INF_WELL_SIMUL, CLUMP_DICT
+        return INF_WELL_SIMUL, TOTAL_INTERACTIONS, CLUMP_DICT
     else:
-        return INF_WELL_SIMUL
+        return INF_WELL_SIMUL, TOTAL_INTERACTIONS

@@ -5,8 +5,8 @@ SIMULATION_PARAMETERS:
                            # 'clump_comp' for a simulation which combines clumping and compensation
                            # 'clump_acc_dam' for a simulation which combines clumping and accrued damage
                            # 'null' for null simulation
-  sheet: 6 # Selects which experimental dataset to use. 0,1,2,3,4,5,6,7: Dose-infection experiments, 7: clump size distribution
-  num_simulations: 10 # How many repeats of a given simulation to run.
+  sheet: 7 # Selects which experimental dataset to use. 0,1,2,3,4,5,6,7: Dose-infection experiments, 7: clump size distribution
+  num_simulations: 3 # How many repeats of a given simulation to run.
   scale: 50 # Keep between 1 and 1000, bigger number=faster simulation
   gamma: .45 # ??
   remove: 1 # 1: take out virions which infect a cell, 0: don't.
@@ -20,7 +20,7 @@ CLUMP_PARAMETERS:
     - 100000 # sheet=4 2020_08_12 TB_GFP_fibroblast
     - 100000 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 100000 # sheet=6 2021_08_13 ME_mC_epithelial
-    - 70000  # sheet=7 2022_11_02_TB_GFP_fib
+    - 500000  # sheet=7 2022_11_02_TB_GFP_fib
 
   distribution: 'fixed'   # How to same virion size (nm). Only choose 'uniform', 'normal', or 'fixed'
   scheme: 'sphere_packing' # How to arrange smaller virions into a sphere. Only choose 'linear', 'regular_polygon', or 'sphere_packing'
@@ -67,7 +67,7 @@ COMPENSATION_PARAMETERS:
     - 0      # sheet=4 2020_08_12 TB_GFP_fibroblast
     - -0.05  # sheet=5 2020_09_14 TR_GFP_epithelial
     - -0.5   # sheet=6 2021_08_13 ME_mC_epithelial
-    - 0.0    # sheet=7 2022_11_02_TB_GFP_fib
+    - -3.0    # sheet=7 2022_11_02_TB_GFP_fib
 
 NULL_PARAMETERS:
   vMax: # Controls how many virions visit a cell. Keep between 10000 and 1000000. Bigger=less virions

@@ -6,7 +6,8 @@ sys.path.append(os.getcwd())
 from simulation_utils.utils import Innoculation, Cell, Virion
 #====================================================================
 def SimulateNull(GEN_WELL_DATA, PARAM_DICT, cell_count):
-    INF_WELL_SIMUL = np.empty(GEN_WELL_DATA.shape[0], int)
+    INF_WELL_SIMUL     = np.empty(GEN_WELL_DATA.shape[0], int)
+    TOTAL_INTERACTIONS = np.empty(GEN_WELL_DATA.shape[0], int)
     #----------------------------------------------------------------
     for init in range(len(GEN_WELL_DATA)): # Iterate thorugh each experiment
         print("=======================================================================")
@@ -74,6 +75,9 @@ def SimulateNull(GEN_WELL_DATA, PARAM_DICT, cell_count):
                                 #GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]]) # works but slow
                                 del GFP_POOL[TO_REMOVE_IDX[c]]
                         #print('DONE + + + + + + ')
+
+                    if (k == 0 or k == int(.33 *cell_count) or k == int(.66 *cell_count) or k == cell_count-1):
+                        print("cell=", k, ", poisson:", num_interactions, ",len(VIR_ATT):", len(VIRION_ATTACKERS), ", len(GFP):", len(GFP_POOL), ", total:", total)
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")
                 break
@@ -81,8 +85,9 @@ def SimulateNull(GEN_WELL_DATA, PARAM_DICT, cell_count):
             if (CELL_POOL[k].infG == True):
                 num_infG = num_infG + 1
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        print("num infG =", num_infG, "| cell_count =", cell_count, "| interactions / cell =", round(total / cell_count, 5))
+        print("num infG =", num_infG, "| cell_count =", cell_count, "| avg. inter/cell =", round(total / cell_count, 4), "| avg. inter/virion =", round(total / GEN_WELL_DATA[init], 4))
         
-        INF_WELL_SIMUL[init] = num_infG
+        INF_WELL_SIMUL[init]     = num_infG
+        TOTAL_INTERACTIONS[init] = total
     #----------------------------------------------------------------
-    return INF_WELL_SIMUL
+    return INF_WELL_SIMUL, TOTAL_INTERACTIONS

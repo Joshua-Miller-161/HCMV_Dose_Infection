@@ -81,11 +81,11 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
         elif (simul_name == 'clump_acc_dam'):
             filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        for simulation in range(num_simulations):
-            if not 'Parameters' in dict_.keys():
+        if not 'Parameters' in dict_.keys():
                 PARAM_LIST_STR = PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT)
                 dict_['Parameters'] = PARAM_LIST_STR
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        for simulation in range(num_simulations):
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
@@ -98,21 +98,21 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             clump_size_df = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name='2022_10_27_TB_size_distribution')
             #print(clump_size_df)
             if save_clump_info:
-                dict_['GFP IU run='+str(simulation)], CLUMP_DICT = SimulateClump(GEN_WELL_DATA, 
-                                                                                 PARAM_DICT, 
-                                                                                 cell_count, 
-                                                                                 clump_size_df,
-                                                                                 simul_name,
-                                                                                 save_clump_info=True)
+                dict_['GFP IU run='+str(simulation)], dict_['total_interactions run='+str(simulation)], CLUMP_DICT = SimulateClump(GEN_WELL_DATA, 
+                                                                                                                                   PARAM_DICT, 
+                                                                                                                                   cell_count, 
+                                                                                                                                   clump_size_df,
+                                                                                                                                   simul_name,
+                                                                                                                                   save_clump_info=True)
                 with open(os.path.join(os.path.join(save_path, 'clump_information'), filename+'_run='+str(simulation)+'_CLUMP'+'.json'), "w") as f:
                     json.dump(CLUMP_DICT, f)
             else:
-                dict_['GFP IU run='+str(simulation)] = SimulateClump(GEN_WELL_DATA, 
-                                                                     PARAM_DICT, 
-                                                                     cell_count,
-                                                                     clump_size_df,
-                                                                     simul_name,
-                                                                     save_clump_info=False)
+                dict_['GFP IU run='+str(simulation)], dict_['total_interactions run='+str(simulation)] = SimulateClump(GEN_WELL_DATA, 
+                                                                                                                       PARAM_DICT, 
+                                                                                                                       cell_count,
+                                                                                                                       clump_size_df,
+                                                                                                                       simul_name,
+                                                                                                                       save_clump_info=False)
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             PARAM_LIST_STR = PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT)
             dict_['Parameters'] = PARAM_LIST_STR
@@ -127,11 +127,11 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             save_path = os.path.join(os.getcwd(), 'simulation_results/comp')
         filename = "CompSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_k="+str(PARAM_DICT['kappa'])+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        for simulation in range(num_simulations):
-            if not 'Parameters' in dict_.keys():
+        if not 'Parameters' in dict_.keys():
                 PARAM_LIST_STR = PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT)
                 dict_['Parameters'] = PARAM_LIST_STR
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        for simulation in range(num_simulations):
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
@@ -141,11 +141,10 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
-            dict_['GFP IU run='+str(simulation)] = SimulateComp(GEN_WELL_DATA, 
-                                                                PARAM_DICT, 
-                                                                cell_count)
+            dict_['GFP IU run='+str(simulation)], dict_['total_interactions run='+str(simulation)] = SimulateComp(GEN_WELL_DATA, 
+                                                                                                                  PARAM_DICT, 
+                                                                                                                  cell_count)
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
             SimulResults = pd.DataFrame.from_dict(dict_)
             SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'), index=False)
             print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
@@ -157,11 +156,11 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             save_path = os.path.join(os.getcwd(), 'simulation_results/acc_dam')
         filename = "AccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        for simulation in range(num_simulations):
-            if not 'Parameters' in dict_.keys():
+        if not 'Parameters' in dict_.keys():
                 PARAM_LIST_STR = PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT)
                 dict_['Parameters'] = PARAM_LIST_STR
-            #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        for simulation in range(num_simulations):
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
@@ -171,9 +170,9 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
-            dict_['GFP IU run='+str(simulation)] = SimulateAccDam(GEN_WELL_DATA, 
-                                                                  PARAM_DICT, 
-                                                                  cell_count)
+            dict_['GFP IU run='+str(simulation)], dict_['total_interactions run='+str(simulation)] = SimulateAccDam(GEN_WELL_DATA, 
+                                                                                                                    PARAM_DICT, 
+                                                                                                                    cell_count)
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             SimulResults = pd.DataFrame.from_dict(dict_)
             SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'VAR_REMOVAL.csv'), index=False)
@@ -185,10 +184,11 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             save_path = os.path.join(os.getcwd(), 'simulation_results/null')
         filename = "NullSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['b'])+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        for simulation in range(num_simulations):
-            if not 'Parameters' in dict_.keys():
+        if not 'Parameters' in dict_.keys():
                 PARAM_LIST_STR = PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT)
                 dict_['Parameters'] = PARAM_LIST_STR
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        for simulation in range(num_simulations):
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
@@ -199,9 +199,9 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
-            dict_['GFP IU run='+str(simulation)] = SimulateNull(GEN_WELL_DATA, 
-                                                                PARAM_DICT, 
-                                                                cell_count)
+            dict_['GFP IU run='+str(simulation)], dict_['total_interactions run='+str(simulation)] = SimulateNull(GEN_WELL_DATA, 
+                                                                                                                  PARAM_DICT, 
+                                                                                                                  cell_count)
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             SimulResults = pd.DataFrame.from_dict(dict_)
             SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'), index=False)

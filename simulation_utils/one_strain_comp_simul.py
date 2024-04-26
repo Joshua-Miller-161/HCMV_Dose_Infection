@@ -6,7 +6,8 @@ sys.path.append(os.getcwd())
 from simulation_utils.utils import Innoculation, Cell, Virion, Compensate
 #====================================================================
 def SimulateComp(GEN_WELL_DATA, PARAM_DICT, cell_count):
-    INF_WELL_SIMUL = np.empty(GEN_WELL_DATA.shape[0], int)
+    INF_WELL_SIMUL     = np.empty(GEN_WELL_DATA.shape[0], int)
+    TOTAL_INTERACTIONS = np.empty(GEN_WELL_DATA.shape[0], int)
     #----------------------------------------------------------------
     for init in range(len(GEN_WELL_DATA)): # Iterate thorugh each experiment
         print("=======================================================================")
@@ -92,8 +93,9 @@ def SimulateComp(GEN_WELL_DATA, PARAM_DICT, cell_count):
             if (CELL_POOL[k].infG == True):
                 num_infG = num_infG + 1
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-        print("num infG = ", num_infG, " | cell_count = ", cell_count, " | GEN_WELL_DATA = ", GEN_WELL_DATA[init], " | num interactions = ", round(total / cell_count, 5))
+        print("num infG =", num_infG, "| cell_count =", cell_count, "| avg. inter/cell =", round(total / cell_count, 4), "| avg. inter/virion =", round(total / GEN_WELL_DATA[init], 4))
         
-        INF_WELL_SIMUL[init] = num_infG
+        INF_WELL_SIMUL[init]     = num_infG
+        TOTAL_INTERACTIONS[init] = total
     #----------------------------------------------------------------
-    return INF_WELL_SIMUL
+    return INF_WELL_SIMUL, TOTAL_INTERACTIONS

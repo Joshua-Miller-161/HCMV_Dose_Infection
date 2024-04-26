@@ -15,8 +15,8 @@ from plotting_utils.utils import negLogLikeModel, model,  CombineSameGenWell
 from simulation_utils.utils import PrepareData
 #====================================================================
 ''' Files '''
-file_simul = "simulation_results/clump_acc_dam/ClumpAccDamSimul_2022_11_02_TB_GFP_fib_s=100_vMax=700.0_b=-2.0_sp_fix_n=3.csv"
-file_simul_size = "simulation_results/clump_acc_dam/clump_information/ClumpAccDamSimul_2022_11_02_TB_GFP_fib_s=100_vMax=700.0_b=-2.0_sp_fix_run=0_CLUMP.json"
+file_simul = "simulation_results/clump_comp/ClumpCompSimul_2022_11_02_TB_GFP_fib_s=50_vMax=10000.0_k=-3.0_sp_fix_r=1_n=3.csv"
+file_simul_size = "simulation_results/clump_comp/clump_information/ClumpCompSimul_2022_11_02_TB_GFP_fib_s=50_vMax=10000.0_k=-3.0_sp_fix_r=1_run=2_CLUMP.json"
 
 file_data = "data/Experimental_data_Ed_Josh.xlsx"
 
