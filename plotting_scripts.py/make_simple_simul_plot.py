@@ -15,7 +15,7 @@ from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell
 #====================================================================
 ''' Get simulation data '''
 
-file = 'simulation_results/comp/CompSimul_2021_07_13 GFP_TB_fibroblast_s=100_vMax=800.0_k=-0.03_r=1_n=1.csv'
+file = 'simulation_results/comp/CompSimul_2021_07_13 GFP_TB_fibroblast_s=50_vMax=1600.0_k=-0.03_r=1_n=10.csv'
 df_simul = pd.read_csv(file)
 #--------------------------------------------------------------------
 PARAM_DICT_SIMUL = ExtractParams(df_simul)
@@ -48,8 +48,10 @@ elif (simul_name == 'null'):
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
-               '2022_11_02_TB_GFP_fib']
+               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib']
 df_data = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name=SHEET_NAMES[sheet])
+
+print(SHEET_NAMES[6])
 #--------------------------------------------------------------------
 PARAM_DICT_DATA = ExtractParams(df_data)
 cell_count = int(PARAM_DICT_DATA['cell_count'] / scale)
@@ -69,7 +71,18 @@ print(UPPERS)
 
 MARKERS = config['PLOTTING']['markers_dict']#['o', '^', 's', 'D']
 COLORS = config['PLOTTING']['colors_dict']
+
+if ('GFP' in SHEET_NAMES[sheet]):
+    color  = COLORS['GFP']
+    marker = MARKERS['GFP']
+elif (('cherry' in SHEET_NAMES[sheet]) or ('mCherry' in SHEET_NAMES[sheet]) or ('mC' in SHEET_NAMES[sheet])):
+    color = COLORS['cherry']
+    marker = MARKERS['cherry']
+
 LETTERS = ['A', 'B', 'C']
+
+replacement_val = config['PLOTTING']['replacement_val']
+band_type = config['PLOTTING']['band_type']
 #====================================================================
 ''' Prepare experimental and simulation data for plotting '''
 
@@ -103,7 +116,7 @@ CIS_U = (1.96 * np.ones(np.shape(INF_WELL_SIMULS_U)[0])) * INF_WELL_SIMULS_STDEV
 MAXS_U = np.amax(INF_WELL_SIMULS_U, axis=1)
 MINS_U = np.amin(INF_WELL_SIMULS_U, axis=1)
 
-print(np.shape(GEN_WELL_SIMUL_U), np.shape(INF_WELL_SIMULS_U), np.shape(MAXS_U))
+print(np.shape(GEN_WELL_SIMUL_U), np.shape(INF_WELL_SIMULS_U), np.shape(INF_WELL_SIMULS_MEAN_U), np.shape(MAXS_U), np.shape(CIS_U))
 #--------------------------------------------------------------------
 GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros = PrepareData(df_data, scale)
 #====================================================================
@@ -137,27 +150,32 @@ y_simul = model(x_simul, result_simul.params)
 print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
 print("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=")
 #====================================================================
-''' Plot simulation results and best fit curves '''
+''' Replace values of 0 with a replacement value '''
+print("AHHHHHHHH ", np.shape(INF_WELL_SIMULS_U), np.shape(INF_WELL_SIMULS_MEAN_U))
+for i in range(np.shape(INF_WELL_SIMULS_MEAN_U)[0]):
+    if (band_type == 'minmax'):
+        if (MINS_U[i] <= 0):
+            MINS_U[i] = replacement_val * cell_count
 
-plt.scatter(GEN_CELL_DATA, INF_CELL_DATA, s=80, facecolors=COLORS['GFP'], edgecolors='none', marker=MARKERS['GFP'], alpha=.3)
+    elif (band_type == 'CIs'):
+        if (INF_WELL_SIMULS_MEAN_U[i] <= 0):
+            INF_WELL_SIMULS_MEAN_U[i] = replacement_val * cell_count
+#====================================================================
+''' Plot data and simulation results and best fit curves '''
+
+plt.scatter(GEN_CELL_DATA, INF_CELL_DATA, s=80, facecolors=color, edgecolors='none', marker=marker, alpha=.3)
 plt.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]], 'b-.', linewidth = 2)
-
+#--------------------------------------------------------------------
 if (num_simulations == 1):
-    plt.scatter(GEN_CELL_SIMUL, INF_CELL_SIMULS_MEAN.ravel(), s=80, facecolors='none', edgecolors=COLORS['GFP'], marker=MARKERS['GFP'])
+    plt.scatter(GEN_CELL_SIMUL, INF_CELL_SIMULS_MEAN.ravel(), s=80, facecolors='none', edgecolors=color, marker=marker)
+
 elif (num_simulations > 1):
-    #plt.fill_between(GEN_CELL_SIMUL, (INF_WELL_SIMULS_MEAN-CIS) / cell_count, (INF_WELL_SIMULS_MEAN+CIS) / cell_count, color='black', alpha=.3)
-    
-    #plt.fill_between(GEN_CELL_SIMUL, MINS / cell_count, MAXS / cell_count, color='black', alpha=.3)
-    
-    plt.fill_between(GEN_WELL_SIMUL_U / cell_count, MINS_U / cell_count, MAXS_U / cell_count, color='black', alpha=.3)
+    if (band_type == 'minmax'):
+        plt.fill_between(GEN_WELL_SIMUL_U / cell_count, MINS_U / cell_count, MAXS_U / cell_count, color='black', alpha=.3)
+    elif (band_type == 'CIs'):
+        plt.fill_between(GEN_WELL_SIMUL_U / cell_count, (INF_WELL_SIMULS_MEAN_U - CIS_U) / cell_count, (INF_WELL_SIMULS_MEAN_U + CIS_U) / cell_count, color='black', alpha=.3)
+
     plt.plot(GEN_WELL_SIMUL_U / cell_count, INF_CELL_SIMULS_MEAN_U, color='black', linestyle='-')
-    #plt.scatter(GEN_WELL_SIMUL_U / cell_count, MINS_U / cell_count, color='black', alpha=.3)
-    #plt.scatter(GEN_WELL_SIMUL_U / cell_count, MAXS_U / cell_count, color='black', alpha=.3)
-    
-    # for gen_well, inf_well_simul in INF_WELL_SIMULS_DICT.items():
-    #     plt.scatter(np.asarray([float(gen_well)] * len(inf_well_simul)) / cell_count, 
-    #                 inf_well_simul / cell_count,
-    #                 s=20, facecolors='greenyellow', edgecolors='none', marker='o', alpha=.3)
 
 plt.plot(x_simul[LOWERS[sheet]:UPPERS[sheet]], y_simul[LOWERS[sheet]:UPPERS[sheet]], 'r--', linewidth = 2)
 
@@ -165,11 +183,11 @@ plt.plot(x_simul[LOWERS[sheet]:UPPERS[sheet]], y_simul[LOWERS[sheet]:UPPERS[shee
 #plt.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]], color='pink', linestyle='-.', linewidth = 2)
 #====================================================================
 ''' Formatting '''
-legendD = mlines.Line2D([], [], color='b', linestyle='-.', markerfacecolor='none', markeredgecolor=COLORS['GFP'], markerfacecoloralt='none', marker=MARKERS['GFP'],
-                          markersize=10, label = "HCMV-TB (GFP) (data): n = " + str(round(n_data, 3)))
+legendD = mlines.Line2D([], [], color='b', linestyle='-.', markerfacecolor=color, markeredgecolor='none', markerfacecoloralt='none', marker=marker, alpha=0.6,
+                        markersize=10, label = "HCMV-TB (GFP) (data): n = " + str(round(n_data, 3)))
 legendS = ''
 if (num_simulations == 1):
-    legendS = mlines.Line2D([], [], color='y', linestyle='--', markerfacecolor='none', markeredgecolor=COLORS['GFP'], markerfacecoloralt='none', marker=MARKERS['GFP'],
+    legendS = mlines.Line2D([], [], color='y', linestyle='--', markerfacecolor='none', markeredgecolor=color, markerfacecoloralt='none', marker=marker,
                             markersize=10, label= "Simulation: n = " + str(round(n_simul, 3)))
 elif (num_simulations > 1):
     legendS = mlines.Line2D([], [], color='k', linestyle='-', label=r'Simul. mean, $\overline{n} = $' + str(round(n_simul, 3)) + " ("+str(num_simulations)+" runs)")
@@ -197,28 +215,28 @@ elif (PARAM_DICT_SIMUL['remove'] == 0):
 if ('clump' in simul_name):
     if (simul_name == 'clump'):
         plt.title(SHEET_NAMES[sheet] + ' | Clumping')
-        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax)+"\n"+remove_str)
+        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+"\n"+remove_str)
     elif (simul_name == 'clump_comp'):
         plt.title(SHEET_NAMES[sheet] + ' | Clumping + Compensation')
-        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa])+"\n"+remove_str)
+        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa])+"\n"+remove_str)
     elif (simul_name == 'clump_acc_dam'):
         plt.title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
-        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
+        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
     plt.text(1.1 * xMin, .05 * yMax, scheme)
     plt.text(1.1 * xMin, .025 * yMax, distribution)
 
 elif (simul_name == 'acc_dam'):
-    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta)+"\n"+remove_str)
+    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta)+"\n"+remove_str)
     plt.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
     plt.title(SHEET_NAMES[sheet] + ' | Acc. Damage')
 
 elif (simul_name == 'comp'):
-    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa)+"\n"+remove_str)
+    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa)+"\n"+remove_str)
     plt.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
     plt.title(SHEET_NAMES[sheet] + ' | Compensation')
 
 elif (simul_name == 'null'):
-    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b'])+"\n"+remove_str)
+    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b'])+"\n"+remove_str)
     plt.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}+b$')
     plt.title(SHEET_NAMES[sheet] + ' | Null')
 
@@ -261,4 +279,4 @@ elif (simul_name == 'comp'):
 elif (simul_name == 'null'):
     filename = "NullSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(b)+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations) 
 
-fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory

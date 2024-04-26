@@ -25,7 +25,8 @@ num_simulations = config['SIMULATION_PARAMETERS']['num_simulations']
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
-               '2022_11_02_TB_GFP_fib', '2022_10_27_TB_size_distribution']
+               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib', 
+               '2022_10_27_TB_size_distribution']
 dose_inf_df = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name=SHEET_NAMES[sheet])
 
 #print(dose_inf_df)

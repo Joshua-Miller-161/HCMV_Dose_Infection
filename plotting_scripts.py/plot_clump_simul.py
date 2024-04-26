@@ -23,7 +23,8 @@ file_data = "data/Experimental_data_Ed_Josh.xlsx"
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
-               '2022_11_02_TB_GFP_fib', '2022_10_27_TB_size_distribution']
+               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib', 
+               '2022_10_27_TB_size_distribution']
 
 assert "clump" or "Clump" in file_simul, "Simulation type must be 'clump', 'clump_comp', or 'clump_acc_dam'."
 #====================================================================
@@ -48,6 +49,14 @@ print(UPPERS)
 
 MARKERS = config['PLOTTING']['markers_dict']#['o', '^', 's', 'D']
 COLORS = config['PLOTTING']['colors_dict']
+
+if ('GFP' in SHEET_NAMES[sheet]):
+    color  = COLORS['GFP']
+    marker = MARKERS['GFP']
+elif (('cherry' in SHEET_NAMES[sheet]) or ('mCherry' in SHEET_NAMES[sheet]) or ('mC' in SHEET_NAMES[sheet])):
+    color = COLORS['cherry']
+    marker = MARKERS['cherry']
+
 LETTERS = ['A', 'B', 'C']
 #====================================================================
 ''' Get simulation data '''
@@ -187,7 +196,7 @@ ax0.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]
 #ax0.plot(x2[LL[sheet]:UU[sheet]], y2[LL[sheet]:UU[sheet]], 'r--', linewidth = 2)
 
 if (num_simulations == 1):
-    ax0.scatter(GEN_CELL_SIMUL, INF_CELL_SIMULS_MEAN.ravel(), s=80, facecolors='none', edgecolors=COLORS['GFP'], marker=MARKERS['GFP'])
+    ax0.scatter(GEN_CELL_SIMUL, INF_CELL_SIMULS_MEAN.ravel(), s=80, facecolors='none', edgecolors=color, marker=marker)
 elif (num_simulations > 1):
     #plt.fill_between(GEN_CELL_SIMUL, (INF_WELL_SIMULS_MEAN-CIS) / cell_count, (INF_WELL_SIMULS_MEAN+CIS) / cell_count, color='black', alpha=.3)
     
@@ -229,12 +238,11 @@ xMax = 10**3
 yMin = 10**-6
 yMax = 1
 
-
-legendD = mlines.Line2D([], [], color='b', linestyle='-.', markerfacecolor=COLORS['GFP'], markeredgecolor='none', markerfacecoloralt='none', marker=MARKERS['GFP'],
+legendD = mlines.Line2D([], [], color='b', linestyle='-.', markerfacecolor=color, markeredgecolor='none', markerfacecoloralt='none', marker=marker,
                           markersize=10, label = "HCMV-TB (GFP) (data): n = " + str(round(n_data, 3)))
 legendS = ''
 if (num_simulations == 1):
-    legendS = mlines.Line2D([], [], color='y', linestyle='--', markerfacecolor='none', markeredgecolor=COLORS['GFP'], markerfacecoloralt='none', marker=MARKERS['GFP'],
+    legendS = mlines.Line2D([], [], color='y', linestyle='--', markerfacecolor='none', markeredgecolor=color, markerfacecoloralt='none', marker=marker,
                             markersize=10, label= "Simulation: n = " + str(round(n_simul, 3)))
 elif (num_simulations > 1):
     legendS = mlines.Line2D([], [], color='k', linestyle='-', label=r'Simul. mean, $\overline{n} = $' + str(round(n_simul, 3)) + " ("+str(num_simulations)+" runs)")
