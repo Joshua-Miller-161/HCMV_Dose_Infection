@@ -10,7 +10,7 @@ def SimulateAccDam(GEN_WELL_DATA, PARAM_DICT, cell_count):
     #----------------------------------------------------------------
     for init in range(len(GEN_WELL_DATA)): # Orig len(GEN_WELL_DATA) Iterate thorugh each experiment
         print("=======================================================================")
-        print("GEN_WELL_DATA = ", GEN_WELL_DATA[init],"| Experiment ", init, "| gamma=", PARAM_DICT['gamma'], "| beta=", PARAM_DICT['beta'], ", vMax:", PARAM_DICT['vMax'])
+        print(PARAM_DICT['simul_name'], "| GEN_WELL_DATA[", init, "] = ", GEN_WELL_DATA[init], "| gamma=", PARAM_DICT['gamma'], "| beta=", PARAM_DICT['beta'], ", vMax:", PARAM_DICT['vMax'])
         print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ''' Set up virus and cell populations '''
@@ -31,7 +31,7 @@ def SimulateAccDam(GEN_WELL_DATA, PARAM_DICT, cell_count):
             if (len(GFP_POOL) > 0):
                 #----------------------------------------------------
                 ''' Determine which virions interact with the cell '''
-                num_interactions = np.random.poisson(len(GFP_POOL) / PARAM_DICT['vMax']) # Works with GEN_WELL_DATA[init]. Calculate the number of virions that will visit the cell
+                num_interactions = np.random.poisson(GEN_WELL_DATA[init] / PARAM_DICT['vMax']) # Works with GEN_WELL_DATA[init]. Calculate the number of virions that will visit the cell
                 
                 VIRION_ATTACKERS = []
                 VIRION_ATTACKERS_IDX = []
@@ -65,16 +65,17 @@ def SimulateAccDam(GEN_WELL_DATA, PARAM_DICT, cell_count):
                         if is_successful:
                             TO_REMOVE_IDX.append(VIRION_ATTACKERS_IDX[a])
                     #----------------------------------------------------
-                    ''' Remove virions which have successfully the cell '''
-                    TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
+                    if (PARAM_DICT['remove'] == True):
+                        # Remove virions which have successfully the cell
+                        TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
 
-                    for c in range(len(TO_REMOVE_IDX)):
-                        if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
-                            #print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
-                            break
-                        else:
-                            #print("c=",c,", idx=", TO_REMOVE_IDX[c], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
-                            GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]])
+                        for c in range(len(TO_REMOVE_IDX)):
+                            if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
+                                #print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
+                                break
+                            else:
+                                #print("c=",c,", idx=", TO_REMOVE_IDX[c], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
+                                GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]])
 
                 if (k == 0 or k == 500 or k == 1500 or k == 2299):
                     print("cell=", k, ", poisson:", num_interactions, ",len(VIR_ATT):", len(VIRION_ATTACKERS), ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total:", total, ", Cell.inter:", CELL_POOL[k].inter)

@@ -8,9 +8,11 @@ def PrepareParameters(config, simul_name, sheet, scale=None):
     #----------------------------------------------------------------
     PARAM_DICT = {}
     #----------------------------------------------------------------
+    PARAM_DICT['simul_name']      = config['SIMULATION_PARAMETERS']['simul_name']
     PARAM_DICT['sheet']           = config['SIMULATION_PARAMETERS']['sheet']
     PARAM_DICT['scale']           = config['SIMULATION_PARAMETERS']['scale']
     PARAM_DICT['num_simulations'] = config['SIMULATION_PARAMETERS']['num_simulations']
+    PARAM_DICT['remove']          = config['SIMULATION_PARAMETERS']['remove']
     PARAM_DICT['i_mean']  = config['GFP_VIRUS_PARAMETERS']['mu_inf'] #0
     PARAM_DICT['i_stdev'] = config['GFP_VIRUS_PARAMETERS']['std_inf'] #1
     PARAM_DICT['r_mean']  = config['CELL_PARAMETERS']['mu_res']
@@ -88,7 +90,7 @@ def PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT):
                       'scale='+str(PARAM_DICT['scale']), 'cell_count='+str(cell_count), 
                       'muG='+str(PARAM_DICT['i_mean']), 'sigmaG='+str(PARAM_DICT['i_stdev']),
                       'muR='+str(PARAM_DICT['r_mean']), 'sigmaR='+str(PARAM_DICT['r_stdev']), 
-                      'gamma='+str(PARAM_DICT['gamma']), 'vMax='+str(PARAM_DICT['vMax'])]
+                      'gamma='+str(PARAM_DICT['gamma']), 'vMax='+str(PARAM_DICT['vMax']), 'remove='+str(PARAM_DICT['remove'])]
     #----------------------------------------------------------------
     if ('clump' in simul_name):
         PARAM_LIST_STR.append('scheme='+str(PARAM_DICT['scheme']))

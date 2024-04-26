@@ -36,7 +36,6 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
     #----------------------------------------------------------------
     ''' Get parameters for the simulation '''
     PARAM_DICT = PrepareParameters(config, simul_name, sheet, scale)
-    print("PARAM_DICT=", PARAM_DICT)
     #----------------------------------------------------------------
     ''' Prepare the experimental data '''
     GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros = PrepareData(dose_inf_df, PARAM_DICT['scale'])
@@ -75,11 +74,11 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         filename = ''
         if (simul_name == 'clump'):
-            filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_"+scheme_short+"_"+dist_short # Specify filename
+            filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         elif (simul_name == 'clump_comp'):
-            filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_k="+str(PARAM_DICT['kappa'])+"_"+scheme_short+"_"+dist_short # Specify filename
+            filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_k="+str(PARAM_DICT['kappa'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         elif (simul_name == 'clump_acc_dam'):
-            filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_"+scheme_short+"_"+dist_short # Specify filename
+            filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         for simulation in range(num_simulations):
             if not 'Parameters' in dict_.keys():
@@ -125,7 +124,7 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
     elif (simul_name == 'comp'):
         if (save_path==None):
             save_path = os.path.join(os.getcwd(), 'simulation_results/comp')
-        filename = "CompSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_k="+str(PARAM_DICT['kappa']) # Specify filename
+        filename = "CompSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_k="+str(PARAM_DICT['kappa'])+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         for simulation in range(num_simulations):
             if not 'Parameters' in dict_.keys():
@@ -145,6 +144,7 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
                                                                 PARAM_DICT, 
                                                                 cell_count)
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
             SimulResults = pd.DataFrame.from_dict(dict_)
             SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'), index=False)
             print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
@@ -154,7 +154,7 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
         print("AHHHHHHHHH     ACC DAM")
         if (save_path==None):
             save_path = os.path.join(os.getcwd(), 'simulation_results/acc_dam')
-        filename = "AccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta']) # Specify filename
+        filename = "AccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         for simulation in range(num_simulations):
             if not 'Parameters' in dict_.keys():
@@ -182,7 +182,7 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
     elif (simul_name == 'null'):
         if (save_path==None):
             save_path = os.path.join(os.getcwd(), 'simulation_results/null')
-        filename = "NullSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['b']) # Specify filename
+        filename = "NullSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['b'])+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         for simulation in range(num_simulations):
             if not 'Parameters' in dict_.keys():

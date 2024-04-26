@@ -10,7 +10,7 @@ def SimulateComp(GEN_WELL_DATA, PARAM_DICT, cell_count):
     #----------------------------------------------------------------
     for init in range(len(GEN_WELL_DATA)): # Iterate thorugh each experiment
         print("=======================================================================")
-        print("GEN_WELL_DATA = ", GEN_WELL_DATA[init], " | Experiment ", init)
+        print(PARAM_DICT['simul_name'], "| GEN_WELL_DATA[", init, "] = ", GEN_WELL_DATA[init], "| gamma=", PARAM_DICT['gamma'], "| kappa=", PARAM_DICT['kappa'], ", vMax:", PARAM_DICT['vMax'])
         print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ''' Set up virus and cell populations '''
@@ -61,24 +61,29 @@ def SimulateComp(GEN_WELL_DATA, PARAM_DICT, cell_count):
                     ''' Now have virions try to infect the cell with the buffed infectivity '''
                     is_successful = False
 
-                    for b in range(num_interactions):
+                    for b in range(len(VIRION_ATTACKERS)):
                         VIRION_ATTACKERS[b].i = Compensate(best_inf, VIRION_ATTACKERS[b], PARAM_DICT['kappa'])
                         is_successful = Innoculation(VIRION_ATTACKERS[b], CELL_POOL[k], gamma=PARAM_DICT['gamma'])
                         total += 1
                         if is_successful:
                             TO_REMOVE_IDX.append(VIRION_ATTACKERS_IDX[b])
                     #----------------------------------------------------
-                    ''' Remove virions which have successfully infected cells '''
-                    TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
+                    if (PARAM_DICT['remove'] == True):
+                        # Remove virions which have successfully the cell
+                        TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
 
-                    for c in range(len(TO_REMOVE_IDX)):
-                        if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
-                            #print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
-                            break
-                        else:
-                            #print("c=",c,", idx=", TO_REMOVE_IDX[c], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
-                            GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]])
-                    #print('DONE + + + + + + ')
+                        for c in range(len(TO_REMOVE_IDX)):
+                            if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
+                                #print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
+                                break
+                            else:
+                                #print("c=",c,", idx=", TO_REMOVE_IDX[c], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
+                                GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]])
+                        #print('DONE + + + + + + ')
+                
+                if (k == 0 or k == 500 or k == 1500 or k == 2299):
+                    print("cell=", k, ", poisson:", num_interactions, ",len(VIR_ATT):", len(VIRION_ATTACKERS), ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total:", total)
+
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")
                 break

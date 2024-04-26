@@ -168,16 +168,17 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
                                     TO_REMOVE_IDX.append(VIRIONS_IN_CURR_CLUMP_IDX[aaa])    
                                     #print("----- match ----- inf:", is_successful, ",len:", len(GFP_POOL))
                         # - - - - - - - - - - - - - - - - - - - - - - - -
-                        # Remove virions which successfully infected from pool
-                        TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
+                        if (PARAM_DICT['remove'] == 1):
+                            # Remove virions which successfully infected from pool
+                            TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
 
-                        for idx in range(len(TO_REMOVE_IDX)):
-                            if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
-                                print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
-                                break
-                            else:
-                                #print("idx=",idx,", idx=", TO_REMOVE_IDX[idx], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
-                                GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[idx]])                        
+                            for idx in range(len(TO_REMOVE_IDX)):
+                                if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
+                                    print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
+                                    break
+                                else:
+                                    #print("idx=",idx,", idx=", TO_REMOVE_IDX[idx], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
+                                    GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[idx]])                        
             #--------------------------------------------------------
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")

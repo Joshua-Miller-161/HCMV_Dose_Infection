@@ -10,7 +10,7 @@ def SimulateNull(GEN_WELL_DATA, PARAM_DICT, cell_count):
     #----------------------------------------------------------------
     for init in range(len(GEN_WELL_DATA)): # Iterate thorugh each experiment
         print("=======================================================================")
-        print("GEN_WELL_DATA = ", GEN_WELL_DATA[init], "| Experiment ", init)
+        print(PARAM_DICT['simul_name'], ", GEN_WELL_DATA[",init,"] =", GEN_WELL_DATA[init], " gamma =", PARAM_DICT['gamma'], ", vMax =", PARAM_DICT['vMax'], ", b =", PARAM_DICT['b'])
         print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ''' Set up virus and cell populations '''
@@ -61,17 +61,18 @@ def SimulateNull(GEN_WELL_DATA, PARAM_DICT, cell_count):
                         if is_successful:
                             TO_REMOVE_IDX.append(VIRION_ATTACKERS_IDX[b])
                     #----------------------------------------------------
-                    ''' Remove virions which have successfully infected cells '''
-                    TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
+                    if (PARAM_DICT['remove'] == 1):
+                        # Remove virions which have successfully infected cells
+                        TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
 
-                    for c in range(len(TO_REMOVE_IDX)):
-                        if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
-                            #print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
-                            break
-                        else:
-                            #print("c=",c,", idx=", TO_REMOVE_IDX[c], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
-                            GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]])
-                    #print('DONE + + + + + + ')
+                        for c in range(len(TO_REMOVE_IDX)):
+                            if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
+                                #print('BREAKING idx_len=', len(TO_REMOVE_IDX), ", virions left=",len(GFP_POOL))
+                                break
+                            else:
+                                #print("c=",c,", idx=", TO_REMOVE_IDX[c], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
+                                GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]])
+                        #print('DONE + + + + + + ')
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")
                 break

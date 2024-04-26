@@ -15,7 +15,7 @@ from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell
 #====================================================================
 ''' Get simulation data '''
 
-file = 'simulation_results/acc_dam/AccDamSimul_2021_07_13 GFP_TB_fibroblast_s=100_vMax=700.0_b=-0.8_n=1REMOVAL.csv'
+file = 'simulation_results/comp/CompSimul_2021_07_13 GFP_TB_fibroblast_s=100_vMax=800.0_k=-0.03_r=1_n=1.csv'
 df_simul = pd.read_csv(file)
 #--------------------------------------------------------------------
 PARAM_DICT_SIMUL = ExtractParams(df_simul)
@@ -188,32 +188,38 @@ plt.yscale('log')
 plt.xlim(xMin, xMax)
 plt.ylim(yMin, yMax)
 #--------------------------------------------------------------------
+remove_str = ''
+if (PARAM_DICT_SIMUL['remove'] == 1):
+    remove_str = 'Successful virions\nremoved'
+elif (PARAM_DICT_SIMUL['remove'] == 0):
+    remove_str = 'Successful virions\nleft in'
+
 if ('clump' in simul_name):
     if (simul_name == 'clump'):
         plt.title(SHEET_NAMES[sheet] + ' | Clumping')
-        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax))
+        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax)+"\n"+remove_str)
     elif (simul_name == 'clump_comp'):
         plt.title(SHEET_NAMES[sheet] + ' | Clumping + Compensation')
-        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa]))
+        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa])+"\n"+remove_str)
     elif (simul_name == 'clump_acc_dam'):
         plt.title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
-        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta']))
+        plt.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
     plt.text(1.1 * xMin, .05 * yMax, scheme)
     plt.text(1.1 * xMin, .025 * yMax, distribution)
 
 elif (simul_name == 'acc_dam'):
-    plt.text(1.1 * xMin, .08 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta))
-    plt.text(1.1 * xMin, .04 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
-    plt.title(SHEET_NAMES[sheet] + ' | Acc. Damage' + '\nREMOVAL')
+    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta)+"\n"+remove_str)
+    plt.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
+    plt.title(SHEET_NAMES[sheet] + ' | Acc. Damage')
 
 elif (simul_name == 'comp'):
-    plt.text(1.1 * xMin, .08 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa))
-    plt.text(1.1 * xMin, .04 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
+    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa)+"\n"+remove_str)
+    plt.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
     plt.title(SHEET_NAMES[sheet] + ' | Compensation')
 
 elif (simul_name == 'null'):
-    plt.text(1.1 * xMin, .08 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b']))
-    plt.text(1.1 * xMin, .04 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}+b$')
+    plt.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\n vMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b'])+"\n"+remove_str)
+    plt.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}+b$')
     plt.title(SHEET_NAMES[sheet] + ' | Null')
 
 plt.text(.6 * xMin, 2.2 * yMax, '', fontsize=16, fontweight='bold', va='top', ha='right')
@@ -240,19 +246,19 @@ if ('clump' in simul_name):
         dist_short = 'fix'
     
     if (simul_name == 'clump'):
-        filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_"+scheme_short+"_"+dist_short+"_n="+str(num_simulations) # Specify filename
+        filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations) # Specify filename
     elif (simul_name == 'clump_comp'):
-        filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_k="+str(PARAM_DICT_SIMUL['kappa'])+"_"+scheme_short+"_"+dist_short+"_n="+str(num_simulations) # Specify filename
+        filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_k="+str(PARAM_DICT_SIMUL['kappa'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations) # Specify filename
     elif (simul_name == 'clump_acc_dam'):
-        filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(PARAM_DICT_SIMUL['beta'])+"_"+scheme_short+"_"+dist_short+"_n="+str(num_simulations) # Specify filename
+        filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(PARAM_DICT_SIMUL['beta'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations) # Specify filename
 
 elif (simul_name == 'acc_dam'):
-    filename = "AccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(beta)+"_n="+str(num_simulations)
+    filename = "AccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(beta)+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations)
 
 elif (simul_name == 'comp'):
-    filename = "CompSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_k="+str(kappa)+"_n="+str(num_simulations)
+    filename = "CompSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_k="+str(kappa)+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations)
 
 elif (simul_name == 'null'):
-    filename = "NullSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(b)+"_n="+str(num_simulations) 
+    filename = "NullSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(b)+"_r="+str(PARAM_DICT_SIMUL['remove'])+"_n="+str(num_simulations) 
 
-fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+"REMOVAL.pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
