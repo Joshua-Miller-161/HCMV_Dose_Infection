@@ -178,7 +178,8 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
                                     break
                                 else:
                                     #print("idx=",idx,", idx=", TO_REMOVE_IDX[idx], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
-                                    GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[idx]])                        
+                                    #GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[idx]]) works but slow
+                                    del GFP_POOL[TO_REMOVE_IDX[idx]]
             #--------------------------------------------------------
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")

@@ -75,7 +75,8 @@ def SimulateAccDam(GEN_WELL_DATA, PARAM_DICT, cell_count):
                                 break
                             else:
                                 #print("c=",c,", idx=", TO_REMOVE_IDX[c], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
-                                GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]])
+                                #GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]]) Works but slow
+                                del GFP_POOL[TO_REMOVE_IDX[c]]
 
                 if (k == 0 or k == 500 or k == 1500 or k == 2299):
                     print("cell=", k, ", poisson:", num_interactions, ",len(VIR_ATT):", len(VIRION_ATTACKERS), ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total:", total, ", Cell.inter:", CELL_POOL[k].inter)

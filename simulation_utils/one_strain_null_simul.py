@@ -71,7 +71,8 @@ def SimulateNull(GEN_WELL_DATA, PARAM_DICT, cell_count):
                                 break
                             else:
                                 #print("c=",c,", idx=", TO_REMOVE_IDX[c], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
-                                GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]])
+                                #GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]]) # works but slow
+                                del GFP_POOL[TO_REMOVE_IDX[c]]
                         #print('DONE + + + + + + ')
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")

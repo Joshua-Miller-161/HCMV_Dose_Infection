@@ -78,7 +78,8 @@ def SimulateComp(GEN_WELL_DATA, PARAM_DICT, cell_count):
                                 break
                             else:
                                 #print("c=",c,", idx=", TO_REMOVE_IDX[c], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
-                                GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]])
+                                #GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[c]]) # Works but slow
+                                del GFP_POOL[TO_REMOVE_IDX[c]]
                         #print('DONE + + + + + + ')
                 
                 if (k == 0 or k == 500 or k == 1500 or k == 2299):
