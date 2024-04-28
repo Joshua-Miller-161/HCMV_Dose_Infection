@@ -7,7 +7,7 @@ from simulation_utils.utils import ClumpMetrics2, CalcNumClumps, Innoculation, C
 from misc.misc_utils import FlattenMeans, Trapezoid
 #====================================================================
 def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_name, save_clump_info=False):
-    assert simul_name in ['clump', 'clump_comp', 'clump_acc_dam'], simul_name+" must be: 'clump', 'clump_acc_dam', 'clump_comp'."
+    assert simul_name in ['clump', 'clump_comp', 'clump_acc_dam', 'var_clump_diam'], simul_name+" must be: 'clump', 'clump_acc_dam', 'clump_comp', 'var_clump_diam'."
     #----------------------------------------------------------------
     INF_WELL_SIMUL     = np.empty(GEN_WELL_DATA.shape[0], int)
     TOTAL_INTERACTIONS = np.empty(GEN_WELL_DATA.shape[0], int)
@@ -65,6 +65,9 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
             print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme =", PARAM_DICT['scheme'], "| kappa =", PARAM_DICT['kappa'], "| scale =", PARAM_DICT['scale'])
         elif (simul_name == 'clump_acc_dam'):
             print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme =", PARAM_DICT['scheme'], "| beta =", PARAM_DICT['beta'], "| scale =", PARAM_DICT['scale'])
+        
+        elif (simul_name == 'var_clump_diam'):
+            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| vMaxD =", PARAM_DICT['vMaxD'], "| mean diam =", round(GEN_WELL_DATA[init]/PARAM_DICT['vMaxD'], 3), "(173.884) |", PARAM_DICT['scheme'], "| scale =", PARAM_DICT['scale'])
         print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ''' Set up virus and cell populations '''
@@ -77,15 +80,27 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
         # CLUMP_NUMS: # size 1 clumps, # size 2 clumps, ...
         # CLUMP_SIZES: 1,2,3,...,max clump size
         # radius: max clump size
+        CLUMP_NUMS = -9999 # Put in scope
+        if not (simul_name == 'var_clump_diam'):
+            CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
+                                       max_virions_in_clump,
+                                       diameter_nz,
+                                       mean_virion_diam=PARAM_DICT['mean'], 
+                                       lb_virion_diam=PARAM_DICT['lb'], 
+                                       ub_virion_diam=PARAM_DICT['ub'],
+                                       scheme=PARAM_DICT['scheme'], 
+                                       distribution=PARAM_DICT['distribution'])
         
-        CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
-                                   max_virions_in_clump,
-                                   diameter_nz,
-                                   mean_virion_diam=PARAM_DICT['mean'], 
-                                   lb_virion_diam=PARAM_DICT['lb'], 
-                                   ub_virion_diam=PARAM_DICT['ub'],
-                                   scheme=PARAM_DICT['scheme'], 
-                                   distribution=PARAM_DICT['distribution'])
+        else:
+            CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
+                                       max_virions_in_clump,
+                                       diameter_nz,
+                                       mean_clump_diam=GEN_WELL_DATA[init] / PARAM_DICT['vMaxD'],
+                                       mean_virion_diam=PARAM_DICT['mean'], 
+                                       lb_virion_diam=PARAM_DICT['lb'], 
+                                       ub_virion_diam=PARAM_DICT['ub'],
+                                       scheme=PARAM_DICT['scheme'], 
+                                       distribution=PARAM_DICT['distribution'])
         
         CLUMP_SIZES = np.arange(1, len(CLUMP_NUMS)+1)
         radius = len(CLUMP_NUMS)

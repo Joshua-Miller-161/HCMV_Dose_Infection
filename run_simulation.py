@@ -33,7 +33,7 @@ dose_inf_df = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name=SH
 #====================================================================
 ''' Simulate infections '''
 def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_path=None, scale=None, save_clump_info=False):
-    assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'null'], simul_name+" must be 'clump', 'comp', 'acc_dam', 'clump_acc_dam', 'clump_comp', or 'null'."
+    assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', 'null'], simul_name+" must be 'clump', 'comp', 'acc_dam', 'clump_acc_dam', 'clump_comp', 'var_clump_diam', or 'null'."
     #----------------------------------------------------------------
     ''' Get parameters for the simulation '''
     PARAM_DICT = PrepareParameters(config, simul_name, sheet, scale)
@@ -56,6 +56,9 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             save_path = os.path.join(os.getcwd(), 'simulation_results/clump_comp')
         elif (save_path==None and simul_name == 'clump_acc_dam'):
             save_path = os.path.join(os.getcwd(), 'simulation_results/clump_acc_dam')
+        
+        elif (save_path==None and simul_name == 'var_clump_diam'):
+            save_path = os.path.join(os.getcwd(), 'simulation_results/var_clump_diam')
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         scheme_short = ''
         if (PARAM_DICT['scheme']=='linear'):
@@ -80,6 +83,9 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_k="+str(PARAM_DICT['kappa'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         elif (simul_name == 'clump_acc_dam'):
             filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
+
+        elif (simul_name == 'var_clump_diam'):
+            filename = "VarClumpDiamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_vMaxD="+str(PARAM_DICT['vMaxD'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         if not 'Parameters' in dict_.keys():
                 PARAM_LIST_STR = PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT)
@@ -175,9 +181,9 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
                                                                                                                     cell_count)
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             SimulResults = pd.DataFrame.from_dict(dict_)
-            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'VAR_REMOVAL.csv'), index=False)
+            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'), index=False)
             print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-            print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'VAL_REMOVAL.csv'))
+            print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'))
     #----------------------------------------------------------------    
     elif (simul_name == 'null'):
         if (save_path==None):

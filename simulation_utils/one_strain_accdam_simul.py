@@ -94,4 +94,4 @@ def SimulateAccDam(GEN_WELL_DATA, PARAM_DICT, cell_count):
         INF_WELL_SIMUL[init]     = num_infG
         TOTAL_INTERACTIONS[init] = total
     #----------------------------------------------------------------
-    return INF_WELL_SIMUL
+    return INF_WELL_SIMUL, TOTAL_INTERACTIONS

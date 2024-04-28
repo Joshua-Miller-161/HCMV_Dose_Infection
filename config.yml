@@ -1,18 +1,29 @@
 SIMULATION_PARAMETERS:
-  simul_name: 'comp' # Type 'clump' for clump simulation,  
+  simul_name: 'var_clump_diam' # Type 'clump' for clump simulation,  
                            # 'comp' for compensation simulation,
                            # 'acc_dam' for accrued damage simulation,
                            # 'clump_comp' for a simulation which combines clumping and compensation
                            # 'clump_acc_dam' for a simulation which combines clumping and accrued damage
+                           # 'var_clump_diam' for a clump simulation where the average clump diameter increases as GENOMES/WELL increases
                            # 'null' for null simulation
-  sheet: 7 # Selects which experimental dataset to use. 0,1,2,3,4,5,6,7: Dose-infection experiments, 7: clump size distribution
-  num_simulations: 3 # How many repeats of a given simulation to run.
-  scale: 50 # Keep between 1 and 1000, bigger number=faster simulation
+  sheet: 3 # Selects which experimental dataset to use. 0,1,2,3,4,5,6,7: Dose-infection experiments, 7: clump size distribution
+  num_simulations: 10 # How many repeats of a given simulation to run.
+  scale: 100 # Keep between 1 and 1000, bigger number=faster simulation
   gamma: .45 # ??
   remove: 1 # 1: take out virions which infect a cell, 0: don't.
   
 CLUMP_PARAMETERS:
-  vMAX: # Controls how many clumps visit a cell. Keep between 10000 and 1000000. Bigger=less clumps
+  vMax: # Controls how many clumps visit a cell. Keep between 10000 and 1000000. Bigger=less clumps
+    - 18000  # sheet=0 2021_10_05 TB_GFP_epithelial
+    - 200000 # sheet=1 2020_07_02 ME_GFP_fibroblast
+    - 100000 # sheet=2 2020_05_29 TR_GFP_fibroblast
+    - 100000 # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 100000 # sheet=4 2020_08_12 TB_GFP_fibroblast
+    - 100000 # sheet=5 2020_09_14 TR_GFP_epithelial
+    - 100000 # sheet=6 2021_08_13 ME_mC_epithelial
+    - 500000  # sheet=7 2022_11_02_TB_GFP_fib
+
+  vMaxD: # Controls how many clumps visit a cell. Keep between 10000 and 1000000. Bigger=less clumps
     - 18000  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 200000 # sheet=1 2020_07_02 ME_GFP_fibroblast
     - 100000 # sheet=2 2020_05_29 TR_GFP_fibroblast
@@ -67,7 +78,7 @@ COMPENSATION_PARAMETERS:
     - 0      # sheet=4 2020_08_12 TB_GFP_fibroblast
     - -0.05  # sheet=5 2020_09_14 TR_GFP_epithelial
     - -0.5   # sheet=6 2021_08_13 ME_mC_epithelial
-    - -3.0    # sheet=7 2022_11_02_TB_GFP_fib
+    - 0.2    # sheet=7 2022_11_02_TB_GFP_fib
 
 NULL_PARAMETERS:
   vMax: # Controls how many virions visit a cell. Keep between 10000 and 1000000. Bigger=less virions

@@ -11,11 +11,11 @@ sys.path.append(os.getcwd())
 
 from misc.misc_utils import ExtractParams
 from simulation_utils.utils import PrepareData
-from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell, MakeDataPretty, MakeFilename
+from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell, MakeDataPretty, MakeFilename, PlotText
 #====================================================================
 ''' Get simulation data '''
 
-file = 'simulation_results/comp/CompSimul_2022_11_02_TB_GFP_fib_s=50_vMax=800.0_k=-3.0_r=1_n=3.csv'
+file = 'simulation_results/comp/CompSimul_2022_11_02_TB_GFP_fib_s=50_vMax=800.0_k=0.2_r=1_n=3.csv'
 df_simul = pd.read_csv(file)
 #--------------------------------------------------------------------
 PARAM_DICT_SIMUL = ExtractParams(df_simul)
@@ -230,7 +230,12 @@ ax.text(.6 * xMin, 2.2 * yMax, '', fontsize=16, fontweight='bold', va='top', ha=
 #====================================================================
 ''' Save figure '''
 filename = MakeFilename(PARAM_DICT_SIMUL, SHEET_NAMES[sheet])
-fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+#====================================================================
+#====================================================================
+#====================================================================
+#====================================================================
+#====================================================================
 #====================================================================
 ''' Create figure '''
 fig2, ax2 = plt.subplots(1,1,figsize=(6, 6), dpi=100, constrained_layout=False)
@@ -256,41 +261,23 @@ ax2.set_xlim(xMin, xMax)
 ax2.set_ylim(yMin, yMax)
 ax2.legend(loc='upper left')
 
-remove_str = ''
-if (PARAM_DICT_SIMUL['remove'] == 1):
-    remove_str = 'Successful virions\nremoved'
-elif (PARAM_DICT_SIMUL['remove'] == 0):
-    remove_str = 'Successful virions\nleft in'
+PlotText(ax2, PARAM_DICT_SIMUL, xMin, xMax, yMin, yMax)
 
 if ('clump' in simul_name):
     if (simul_name == 'clump'):
         ax2.set_title(SHEET_NAMES[sheet] + ' | Clumping')
-        ax2.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+"\n"+remove_str)
     elif (simul_name == 'clump_comp'):
         ax2.set_title(SHEET_NAMES[sheet] + ' | Clumping + Compensation')
-        ax2.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa])+"\n"+remove_str)
     elif (simul_name == 'clump_acc_dam'):
         ax2.set_title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
-        ax2.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
-    ax2.text(1.1 * xMin, .05 * yMax, scheme)
-    ax2.text(1.1 * xMin, .025 * yMax, distribution)
-
 elif (simul_name == 'acc_dam'):
-    ax2.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta)+"\n"+remove_str)
-    ax2.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
     ax2.set_title(SHEET_NAMES[sheet] + ' | Acc. Damage')
-
 elif (simul_name == 'comp'):
-    ax2.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa)+"\n"+remove_str)
-    ax2.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
     ax2.set_title(SHEET_NAMES[sheet] + ' | Compensation')
-
 elif (simul_name == 'null'):
-    ax2.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b'])+"\n"+remove_str)
-    ax2.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}+b$')
     ax2.set_title(SHEET_NAMES[sheet] + ' | Null')
 #====================================================================
 ''' Save figure '''
 filename = MakeFilename(PARAM_DICT_SIMUL, SHEET_NAMES[sheet])
-fig2.savefig(os.path.join(os.path.join(os.getcwd(), 'figs/interaction_figs'), "INTER_"+filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+#fig2.savefig(os.path.join(os.path.join(os.getcwd(), 'figs/interaction_figs'), "INTER_"+filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
 plt.show()

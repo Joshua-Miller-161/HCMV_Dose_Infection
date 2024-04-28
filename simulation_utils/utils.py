@@ -4,7 +4,7 @@ import yaml
 #====================================================================
 ''' Parameter list (Initialized with already predicted values) '''
 def PrepareParameters(config, simul_name, sheet, scale=None):
-    assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'null'], simul_name+" must be 'clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', or 'null'."
+    assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', 'null'], simul_name+" must be 'clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'clump_acc_dam', 'var_clump_diam', or 'null'."
     #----------------------------------------------------------------
     PARAM_DICT = {}
     #----------------------------------------------------------------
@@ -47,6 +47,10 @@ def PrepareParameters(config, simul_name, sheet, scale=None):
         if not ('clump' in simul_name):
             PARAM_DICT['vMax'] = float(vMAX[sheet]) / PARAM_DICT['scale']
     
+    if (simul_name == 'var_clump_diam'):
+        vMAXD  = config['CLUMP_PARAMETERS']['vMaxD']
+        PARAM_DICT['vMaxD'] = float(vMAXD[sheet]) / PARAM_DICT['scale']
+
     if (simul_name == 'null'):
         B     = config['NULL_PARAMETERS']['b']
         vMAX  = config['NULL_PARAMETERS']['vMax']
@@ -84,7 +88,7 @@ def PrepareData(dose_inf_df, scale=None):
     return GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros
 #====================================================================
 def PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT):
-    assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'null'], simul_name+" must be 'clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam' or 'null'."
+    assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', 'null'], simul_name+" must be 'clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', or 'null'."
     #----------------------------------------------------------------
     PARAM_LIST_STR = ['simul_name='+str(simul_name), 'num_simulations='+str(PARAM_DICT['num_simulations']), 'sheet='+str(PARAM_DICT['sheet']),
                       'scale='+str(PARAM_DICT['scale']), 'cell_count='+str(cell_count), 
@@ -104,6 +108,9 @@ def PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT):
 
     if ('acc_dam' in simul_name):
         PARAM_LIST_STR.append('beta='+str(PARAM_DICT['beta']))
+
+    if (simul_name == 'var_clump_diam'):
+        PARAM_LIST_STR.append('vMaxD='+str(PARAM_DICT['vMaxD']))
 
     if (simul_name == 'null'):
         PARAM_LIST_STR.append('b='+str(PARAM_DICT['b']))
