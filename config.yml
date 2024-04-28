@@ -49,11 +49,8 @@ CLUMP_PARAMETERS:
     - 170 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 170 # sheet=6 2021_08_13 ME_mC_epithelial
     - 170  # sheet=7 2022_11_02_TB_GFP_fib
-  diameter_func:
-    - 'constant'
-    - 'linear'
-    - 'exponential'
-  
+
+  diameter_func: 'constant' # Changes (or fixes) the mean clump diameter. Only choose 'constant', 'linear', 'exponential' 
   distribution: 'fixed'   # How to same virion size (nm). Only choose 'uniform', 'normal', or 'fixed'
   scheme: 'sphere_packing' # How to arrange smaller virions into a sphere. Only choose 'linear', 'regular_polygon', or 'sphere_packing'
   lb: 150   # Lower bound of virion size (nm)

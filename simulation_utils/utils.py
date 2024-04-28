@@ -3,9 +3,8 @@ from scipy.stats import skewnorm
 import yaml
 #====================================================================
 ''' Parameter list (Initialized with already predicted values) '''
-def PrepareParameters(config, simul_name, sheet, scale=None, diameter_func=None):
+def PrepareParameters(config, simul_name, sheet, scale=None):
     assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', 'null'], simul_name+" must be 'clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'clump_acc_dam', 'var_clump_diam', or 'null'."
-    assert ((diameter_func == None) or (diameter_func in ['constant', 'linear', 'exponential'])), "Got: "+str(diameter_func)+". Must be None, 'constant', 'linear', 'exponential'. " 
     #----------------------------------------------------------------
     PARAM_DICT = {}
     #----------------------------------------------------------------
@@ -49,14 +48,18 @@ def PrepareParameters(config, simul_name, sheet, scale=None, diameter_func=None)
             PARAM_DICT['vMax'] = float(vMAX[sheet]) / PARAM_DICT['scale']
     
     if (simul_name == 'var_clump_diam'):
+        diameter_func = config['CLUMP_PARAMETERS']['diameter_func']
+        assert (diameter_func in ['constant', 'linear', 'exponential']), "Got: "+str(diameter_func)+". Must be 'constant', 'linear', 'exponential'. " 
+        PARAM_DICT['diameter_func'] = config['CLUMP_PARAMETERS']['diameter_func']
+        
         if (diameter_func == 'constant'):
             MEAN_CLUMP_DIAM = config['CLUMP_PARAMETERS']['mean_clump_diam']
             PARAM_DICT['mean_clump_diam'] = float(MEAN_CLUMP_DIAM[sheet])
         elif (diameter_func == 'linear'):
             vMAXD = config['CLUMP_PARAMETERS']['vMaxD']
-            PARAM_DICT['vMaxD']= vMAXD[sheet]
+            PARAM_DICT['vMaxD']= float(vMAXD[sheet])
             BD = config['CLUMP_PARAMETERS']['vMaxD']
-            PARAM_DICT['bD']= BD[sheet]
+            PARAM_DICT['bD']= float(BD[sheet])
 
     if (simul_name == 'null'):
         B     = config['NULL_PARAMETERS']['b']
@@ -389,12 +392,11 @@ def Compensate(best_inf, Virion, kappa):
     return new_inf
 #====================================================================
 def DiamFunc(genomes_well, PARAM_DICT):
-    if (PARAM_DICT['diameter_func'] == 'linear'):
-        return genomes_well / PARAM_DICT['vMaxD'] + PARAM_DICT['bD']
+    if (PARAM_DICT['diameter_func'] == 'constant'):
+        return PARAM_DICT['mean_clump_diam']
     
-    if (PARAM_DICT['diameter_func'] == 'linear'):
+    elif (PARAM_DICT['diameter_func'] == 'linear'):
         return genomes_well / PARAM_DICT['vMaxD'] + PARAM_DICT['bD']
-
 #====================================================================
 class Cell:
     def __init__(self, is_inf_G, num_infG, resistivity, interations):

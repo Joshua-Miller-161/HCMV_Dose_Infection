@@ -20,6 +20,8 @@ with open('config.yml', 'r') as c:
 sheet           = config['SIMULATION_PARAMETERS']['sheet']
 scale           = config['SIMULATION_PARAMETERS']['scale']
 simul_name      = config['SIMULATION_PARAMETERS']['simul_name']
+
+print("ASDJASIDJAS:ODJASJD", simul_name)
 num_simulations = config['SIMULATION_PARAMETERS']['num_simulations']
 
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
@@ -75,6 +77,14 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             dist_short = 'uni'
         elif (PARAM_DICT['distribution']=='fixed'):
             dist_short = 'fix'
+
+        func_short = ''
+        if (PARAM_DICT['diameter_func']=='constant'):
+            func_short = 'norm'
+        elif (PARAM_DICT['diameter_func']=='linear'):
+            func_short = 'uni'
+        elif (PARAM_DICT['diameter_func']=='exponential'):
+            func_short = 'fix'
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         filename = ''
         if (simul_name == 'clump'):
@@ -85,7 +95,7 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
 
         elif (simul_name == 'var_clump_diam'):
-            filename = "VarClumpDiamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_vMaxD="+str(PARAM_DICT['vMaxD'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
+            filename = "VarClumpDiamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_func="+func_short+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         if not 'Parameters' in dict_.keys():
                 PARAM_LIST_STR = PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT)

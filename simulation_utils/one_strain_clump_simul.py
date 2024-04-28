@@ -58,16 +58,25 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
     #----------------------------------------------------------------
     ''' Simulate infections '''
     for init in range(len(GEN_WELL_DATA)): # Iterate thorugh each experiment
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        mean_clump_diam = -999 # Put in scope
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         print("=======================================================================")
+        
         if (simul_name == 'clump'):
+            mean_clump_diam = 173.844 # Derived from '2022_10_27_TB_size_distribution'
             print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme =", PARAM_DICT['scheme'], "| scale =", PARAM_DICT['scale'])
         elif (simul_name == 'clump_comp'):
+            mean_clump_diam = 173.844 # Derived from '2022_10_27_TB_size_distribution'
             print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme =", PARAM_DICT['scheme'], "| kappa =", PARAM_DICT['kappa'], "| scale =", PARAM_DICT['scale'])
         elif (simul_name == 'clump_acc_dam'):
+            mean_clump_diam = 173.844 # Derived from '2022_10_27_TB_size_distribution'
             print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| scheme =", PARAM_DICT['scheme'], "| beta =", PARAM_DICT['beta'], "| scale =", PARAM_DICT['scale'])
         
         elif (simul_name == 'var_clump_diam'):
-            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| vMaxD =", PARAM_DICT['vMaxD'], "| mean diam =", round(GEN_WELL_DATA[init]/PARAM_DICT['vMaxD'], 3), "(173.884) |", PARAM_DICT['scheme'], "| scale =", PARAM_DICT['scale'])
+            mean_clump_diam = DiamFunc(GEN_WELL_DATA[init], PARAM_DICT)
+            print(simul_name, ", GEN_WELL_DATA[", init, "] =", GEN_WELL_DATA[init], "| vMax =", PARAM_DICT['vMax'], "| mean diam =", round(mean_clump_diam, 3), "(173.884) |", PARAM_DICT['scheme'], "| scale =", PARAM_DICT['scale'])
+        
         print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ''' Set up virus and cell populations '''
@@ -80,29 +89,15 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
         # CLUMP_NUMS: # size 1 clumps, # size 2 clumps, ...
         # CLUMP_SIZES: 1,2,3,...,max clump size
         # radius: max clump size
-        CLUMP_NUMS = -9999 # Put in scope
-        if not (simul_name == 'var_clump_diam'):
-            CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
-                                       max_virions_in_clump,
-                                       diameter_nz,
-                                       mean_virion_diam=PARAM_DICT['mean'], 
-                                       lb_virion_diam=PARAM_DICT['lb'], 
-                                       ub_virion_diam=PARAM_DICT['ub'],
-                                       scheme=PARAM_DICT['scheme'], 
-                                       distribution=PARAM_DICT['distribution'])
-        
-        else:
-            mean_clump_diam = DiamFunc(GEN_WELL_DATA[init], PARAM_DICT)
-
-            CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
-                                       max_virions_in_clump,
-                                       diameter_nz,
-                                       mean_clump_diam=mean_clump_diam,
-                                       mean_virion_diam=PARAM_DICT['mean'], 
-                                       lb_virion_diam=PARAM_DICT['lb'], 
-                                       ub_virion_diam=PARAM_DICT['ub'],
-                                       scheme=PARAM_DICT['scheme'], 
-                                       distribution=PARAM_DICT['distribution'])
+        CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
+                                    max_virions_in_clump,
+                                    diameter_nz,
+                                    mean_clump_diam=mean_clump_diam,
+                                    mean_virion_diam=PARAM_DICT['mean'], 
+                                    lb_virion_diam=PARAM_DICT['lb'], 
+                                    ub_virion_diam=PARAM_DICT['ub'],
+                                    scheme=PARAM_DICT['scheme'], 
+                                    distribution=PARAM_DICT['distribution'])
         
         CLUMP_SIZES = np.arange(1, len(CLUMP_NUMS)+1)
         radius = len(CLUMP_NUMS)
@@ -220,6 +215,7 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
         #print(str(GEN_WELL_DATA[init]), ":", CLUMP_DICT[str(GEN_WELL_DATA[init])])
         #print(" + + + + + + + + + + + + + + ")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        print("~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-~-")
         print("num infG =", num_infG, "| cell_count =", cell_count, "| avg. inter/cell =", round(total / cell_count, 4), "| avg. inter/virion =", round(total / GEN_WELL_DATA[init], 4))
         
         INF_WELL_SIMUL[init]     = num_infG
