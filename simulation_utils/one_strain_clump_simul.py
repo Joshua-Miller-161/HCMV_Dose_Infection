@@ -3,7 +3,7 @@ import sys
 import os
 
 sys.path.append(os.getcwd())
-from simulation_utils.utils import ClumpMetrics2, CalcNumClumps, Innoculation, Cell, Virion, Compensate
+from simulation_utils.utils import ClumpMetrics2, CalcNumClumps, Innoculation, Cell, Virion, Compensate, DiamFunc
 from misc.misc_utils import FlattenMeans, Trapezoid
 #====================================================================
 def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_name, save_clump_info=False):
@@ -92,10 +92,12 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
                                        distribution=PARAM_DICT['distribution'])
         
         else:
+            mean_clump_diam = DiamFunc(GEN_WELL_DATA[init], PARAM_DICT)
+
             CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
                                        max_virions_in_clump,
                                        diameter_nz,
-                                       mean_clump_diam=GEN_WELL_DATA[init] / PARAM_DICT['vMaxD'],
+                                       mean_clump_diam=mean_clump_diam,
                                        mean_virion_diam=PARAM_DICT['mean'], 
                                        lb_virion_diam=PARAM_DICT['lb'], 
                                        ub_virion_diam=PARAM_DICT['ub'],
@@ -145,7 +147,7 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
                                     VIRIONS_IN_CURR_CLUMP_IDX.append(aa)
                         # - - - - - - - - - - - - - - - - - - - - - - - -
                         # Vanilla clump simulation
-                        if (simul_name == 'clump'):
+                        if (simul_name == 'clump' or simul_name == 'var_clump_diam'):
                             for aaa in range(len(VIRIONS_IN_CURR_CLUMP)):
                                 is_successful = Innoculation(VIRIONS_IN_CURR_CLUMP[aaa], 
                                                             CELL_POOL[cell_num], 
@@ -200,8 +202,11 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
                                     #print("cell_num=", cell_num, ", len(GFP)=", len(GFP_POOL), ", len(REMOVE)=", len(TO_REMOVE_IDX), ", idx=", idx, ", r_idx=", TO_REMOVE_IDX[idx])
                                     del GFP_POOL[TO_REMOVE_IDX[idx]]
 
-                        if (cell_num == 0 or cell_num == 500 or cell_num == 1500 or cell_num == 2299):
-                            print("cell=", cell_num, ", poisson:", num_clump_interactions, ",len(CURR_CLUMP):", len(VIRIONS_IN_CURR_CLUMP), ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total/cell:", round(total/cell_count, 5))
+                        #if (cell_num == 0 or cell_num == 500 or cell_num == 1500 or cell_num == 2299):
+                        #    print("cell=", cell_num, ", poisson:", num_clump_interactions, ",len(CURR_CLUMP):", len(VIRIONS_IN_CURR_CLUMP), ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total/cell:", round(total/cell_count, 5))
+
+                if (cell_num == 0 or cell_num == int(.33 * cell_count) or cell_num == int(.66 * cell_count) or cell_num == cell_count-1):
+                    print("cell=", cell_num, ", poisson:", num_clump_interactions, ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total/cell:", round(total/cell_count, 5), ", total/genomes:", round(total/GEN_WELL_DATA[init], 5))
             #--------------------------------------------------------
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")
