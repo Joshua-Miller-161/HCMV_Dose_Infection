@@ -20,8 +20,6 @@ with open('config.yml', 'r') as c:
 sheet           = config['SIMULATION_PARAMETERS']['sheet']
 scale           = config['SIMULATION_PARAMETERS']['scale']
 simul_name      = config['SIMULATION_PARAMETERS']['simul_name']
-
-print("ASDJASIDJAS:ODJASJD", simul_name)
 num_simulations = config['SIMULATION_PARAMETERS']['num_simulations']
 
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
@@ -39,6 +37,8 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
     #----------------------------------------------------------------
     ''' Get parameters for the simulation '''
     PARAM_DICT = PrepareParameters(config, simul_name, sheet, scale)
+
+    print(PARAM_DICT)
     #----------------------------------------------------------------
     ''' Prepare the experimental data '''
     GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros = PrepareData(dose_inf_df, PARAM_DICT['scale'])
@@ -80,11 +80,11 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
 
         func_short = ''
         if (PARAM_DICT['diameter_func']=='constant'):
-            func_short = 'norm'
+            func_short = 'c'
         elif (PARAM_DICT['diameter_func']=='linear'):
-            func_short = 'uni'
+            func_short = 'l'
         elif (PARAM_DICT['diameter_func']=='exponential'):
-            func_short = 'fix'
+            func_short = 'e'
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         filename = ''
         if (simul_name == 'clump'):
@@ -95,7 +95,7 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
 
         elif (simul_name == 'var_clump_diam'):
-            filename = "VarClumpDiamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_func="+func_short+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
+            filename = "VarClumpDiamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_f="+func_short+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         if not 'Parameters' in dict_.keys():
                 PARAM_LIST_STR = PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT)
@@ -134,7 +134,7 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             dict_['Parameters'] = PARAM_LIST_STR
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             SimulResults = pd.DataFrame.from_dict(dict_)
-            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'), index=False)
+            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'_xtra.csv'), index=False)
             print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
             print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'))
     #----------------------------------------------------------------

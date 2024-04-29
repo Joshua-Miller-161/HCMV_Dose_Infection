@@ -4,6 +4,7 @@ from itertools import chain
 import sys
 import os
 from lmfit import Parameters, minimize, report_fit
+import matplotlib.pyplot as plt
 
 sys.path.append(os.getcwd())
 from misc.misc_utils import ExtractParams
@@ -132,8 +133,17 @@ def PlotText(ax, PARAM_DICT_SIMUL, xMin, xMax, yMin, yMax):
             ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax'])+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL['kappa'])+"\n"+remove_str)
         elif (PARAM_DICT_SIMUL['simul_name'] == 'clump_acc_dam'):
             ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax']) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
-        ax.text(1.1 * xMin, .05 * yMax, PARAM_DICT_SIMUL['scheme'])
-        ax.text(1.1 * xMin, .025 * yMax, PARAM_DICT_SIMUL['distribution'])
+        
+        elif (PARAM_DICT_SIMUL['simul_name'] == 'var_clump_diam'):
+            if (PARAM_DICT_SIMUL['diameter_func'] == 'constant'):
+                ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax']) + '\n' + r'$\mu_{clump\_diam}=$' + str(PARAM_DICT_SIMUL['mean_clump_diam'])+"\n"+remove_str)
+            elif (PARAM_DICT_SIMUL['diameter_func'] == 'linear'):
+                ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax']) + "\nvMaxD = " + str(PARAM_DICT_SIMUL['vMaxD'])+", bD = " + str(PARAM_DICT_SIMUL['bD']) + "\n"+remove_str)
+            elif (PARAM_DICT_SIMUL['diameter_func'] == 'exponential'):
+                ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax']) + "\nAASDAJSD" + "\n"+remove_str)
+
+        ax.text(1.1 * xMin, .005 * yMax, PARAM_DICT_SIMUL['scheme'])
+        ax.text(1.1 * xMin, .0025 * yMax, PARAM_DICT_SIMUL['distribution'])
 
     elif (PARAM_DICT_SIMUL['simul_name'] == 'acc_dam'):
         ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + '\nvMax = ' + str(PARAM_DICT_SIMUL['vMax']) + ", " + r'$\beta$ = ' + str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
@@ -202,7 +212,7 @@ def PlotSimul(ax, file_path, band_type, replacement_val, x_name='GFP genomes (sc
     #--------------------------------------------------------------------
     return GEN_CELL_SIMUL, INF_CELL_SIMUL_MEAN
 #====================================================================
-def PlotFit(ax, x_data, y_data, lower_idx=0, upper_idx=-1, yMin=10**-6, yMax=1):
+def PlotFit(ax, x_data, y_data, lower_idx=0, upper_idx=-1, yMin=10**-6, yMax=1, color='red', linestyle='-'):
     params = Parameters()
     params.add('gamma', value=.45, min=0, max=1, vary=True)
     params.add('n', value=1, min=0, max=3, vary=True)
@@ -215,8 +225,31 @@ def PlotFit(ax, x_data, y_data, lower_idx=0, upper_idx=-1, yMin=10**-6, yMax=1):
 
     y_model = model(x_data, result.params)
 
-    ax.plot(x_data[lower_idx:upper_idx], y_model[lower_idx:upper_idx], 'r-', linewidth = 1)
+    ax.plot(x_data[lower_idx:upper_idx], y_model[lower_idx:upper_idx], color=color, linestyle=linestyle, linewidth = 1)
     ax.axvline(x=x_data[lower_idx], ymin=yMin, ymax=yMax, color='black', alpha=0.3, zorder=0)
     ax.axvline(x=x_data[upper_idx], ymin=yMin, ymax=yMax, color='black', alpha=0.3, zorder=1)
 
     return g, n
+#====================================================================
+# Shoutout Pablo on StackExchange
+def add_subplot_axes(ax, rect, axisbg='w'):
+    fig = plt.gcf()
+    box = ax.get_position()
+    width = box.width
+    height = box.height
+    inax_position  = ax.transAxes.transform(rect[0:2])
+    transFigure = fig.transFigure.inverted()
+    infig_position = transFigure.transform(inax_position)    
+    x = infig_position[0]
+    y = infig_position[1]
+    width *= rect[2]
+    height *= rect[3]  # <= Typo was here
+    subax = fig.add_axes([x,y,width,height],facecolor='none')  # matplotlib 2.0+
+    #subax = fig.add_axes([x,y,width,height])
+    x_labelsize = subax.get_xticklabels()[0].get_size()
+    y_labelsize = subax.get_yticklabels()[0].get_size()
+    x_labelsize *= rect[2]**0.5
+    y_labelsize *= rect[3]**0.5
+    subax.xaxis.set_tick_params(labelsize=x_labelsize)
+    subax.yaxis.set_tick_params(labelsize=y_labelsize)
+    return subax

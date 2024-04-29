@@ -7,7 +7,7 @@ SIMULATION_PARAMETERS:
                            # 'var_clump_diam' for a clump simulation where the average clump diameter increases as GENOMES/WELL increases
                            # 'null' for null simulation
   sheet: 3 # Selects which experimental dataset to use. 0,1,2,3,4,5,6,7: Dose-infection experiments, 7: clump size distribution
-  num_simulations: 3 # How many repeats of a given simulation to run.
+  num_simulations: 2 # How many repeats of a given simulation to run.
   scale: 100 # Keep between 1 and 1000, bigger number=faster simulation
   gamma: .45 # ??
   remove: 1 # 1: take out virions which infect a cell, 0: don't.
@@ -35,7 +35,7 @@ CLUMP_PARAMETERS:
     - 18000  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 200000 # sheet=1 2020_07_02 ME_GFP_fibroblast
     - 100000 # sheet=2 2020_05_29 TR_GFP_fibroblast
-    - 100000 # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 1500 # sheet=3 2021_07_13 GFP_TB_fibroblast
     - 100000 # sheet=4 2020_08_12 TB_GFP_fibroblast
     - 100000 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 100000 # sheet=6 2021_08_13 ME_mC_epithelial
@@ -44,13 +44,13 @@ CLUMP_PARAMETERS:
     - 170  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 170 # sheet=1 2020_07_02 ME_GFP_fibroblast
     - 170 # sheet=2 2020_05_29 TR_GFP_fibroblast
-    - 170 # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 120 # sheet=3 2021_07_13 GFP_TB_fibroblast
     - 170 # sheet=4 2020_08_12 TB_GFP_fibroblast
     - 170 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 170 # sheet=6 2021_08_13 ME_mC_epithelial
     - 170  # sheet=7 2022_11_02_TB_GFP_fib
 
-  diameter_func: 'constant' # Changes (or fixes) the mean clump diameter. Only choose 'constant', 'linear', 'exponential' 
+  diameter_func: 'linear' # Changes (or fixes) the mean clump diameter. Only choose 'constant', 'linear', 'exponential' 
   distribution: 'fixed'   # How to same virion size (nm). Only choose 'uniform', 'normal', or 'fixed'
   scheme: 'sphere_packing' # How to arrange smaller virions into a sphere. Only choose 'linear', 'regular_polygon', or 'sphere_packing'
   lb: 150   # Lower bound of virion size (nm)

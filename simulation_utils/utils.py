@@ -57,8 +57,8 @@ def PrepareParameters(config, simul_name, sheet, scale=None):
             PARAM_DICT['mean_clump_diam'] = float(MEAN_CLUMP_DIAM[sheet])
         elif (diameter_func == 'linear'):
             vMAXD = config['CLUMP_PARAMETERS']['vMaxD']
-            PARAM_DICT['vMaxD']= float(vMAXD[sheet])
-            BD = config['CLUMP_PARAMETERS']['vMaxD']
+            PARAM_DICT['vMaxD']= float(vMAXD[sheet]) / PARAM_DICT['scale']
+            BD = config['CLUMP_PARAMETERS']['bD']
             PARAM_DICT['bD']= float(BD[sheet])
 
     if (simul_name == 'null'):
@@ -97,9 +97,8 @@ def PrepareData(dose_inf_df, scale=None):
     
     return GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros
 #====================================================================
-def PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT, diameter_func=None):
+def PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT):
     assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', 'null'], simul_name+" must be 'clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', or 'null'."
-    assert diameter_func == None or diameter_func in ['constant', 'linear', 'exponential'], "Got: "+str(diameter_func)+". Must be None, 'constant', 'linear', 'exponential'. " 
     #----------------------------------------------------------------
     PARAM_LIST_STR = ['simul_name='+str(simul_name), 'num_simulations='+str(PARAM_DICT['num_simulations']), 'sheet='+str(PARAM_DICT['sheet']),
                       'scale='+str(PARAM_DICT['scale']), 'cell_count='+str(cell_count), 
@@ -119,12 +118,12 @@ def PrepareParamList(GEN_CELL_DATA, simul_name, cell_count, PARAM_DICT, diameter
 
     if ('acc_dam' in simul_name):
         PARAM_LIST_STR.append('beta='+str(PARAM_DICT['beta']))
-
+    
     if (simul_name == 'var_clump_diam'):
         PARAM_LIST_STR.append('diameter_func='+str(PARAM_DICT['diameter_func']))
-        if (diameter_func == 'constant'):
+        if (PARAM_DICT['diameter_func'] == 'constant'):
             PARAM_LIST_STR.append('mean_clump_diam='+str(PARAM_DICT['mean_clump_diam']))
-        elif (diameter_func == 'linear'):
+        elif (PARAM_DICT['diameter_func'] == 'linear'):
             PARAM_LIST_STR.append('vMaxD='+str(PARAM_DICT['vMaxD']))
             PARAM_LIST_STR.append('bD='+str(PARAM_DICT['bD']))
 
@@ -396,7 +395,8 @@ def DiamFunc(genomes_well, PARAM_DICT):
         return PARAM_DICT['mean_clump_diam']
     
     elif (PARAM_DICT['diameter_func'] == 'linear'):
-        return genomes_well / PARAM_DICT['vMaxD'] + PARAM_DICT['bD']
+        print("genomes/well=", genomes_well, ', vMaxD=', PARAM_DICT['vMaxD'], ", bD=", PARAM_DICT['bD'])
+        return (genomes_well / PARAM_DICT['vMaxD']) + PARAM_DICT['bD']
 #====================================================================
 class Cell:
     def __init__(self, is_inf_G, num_infG, resistivity, interations):

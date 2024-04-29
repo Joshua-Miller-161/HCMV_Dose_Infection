@@ -11,11 +11,11 @@ sys.path.append(os.getcwd())
 
 from misc.misc_utils import ExtractParams
 from simulation_utils.utils import PrepareData
-from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell, MakeDataPretty, MakeFilename, PlotText
+from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell, MakeDataPretty, MakeFilename, PlotText, PlotFit, PlotSimul, BasicFormat
 #====================================================================
 ''' Get simulation data '''
 
-file = 'simulation_results/comp/CompSimul_2022_11_02_TB_GFP_fib_s=50_vMax=800.0_k=0.2_r=1_n=3.csv'
+file = 'simulation_results/var_clump_diam/VarClumpDiamSimul_2021_07_13 GFP_TB_fibroblast_s=100_vMax=1000.0_f=l_sp_fix_r=1_n=3.csv'
 df_simul = pd.read_csv(file)
 #--------------------------------------------------------------------
 PARAM_DICT_SIMUL = ExtractParams(df_simul)
@@ -31,7 +31,7 @@ r_stdev         = PARAM_DICT_SIMUL['sigmaR']
 gamma           = PARAM_DICT_SIMUL['gamma']
 vMax            = PARAM_DICT_SIMUL['vMax']
 
-assert simul_name in ['clump', 'comp', 'acc_dam', 'null', 'clump_comp', 'clump_acc_dam'], "Got: "+simul_name+". 'simul_name' must be one of 'clump', 'comp', 'acc_dam', 'null', 'clump_comp', or 'clump_acc_dam'."
+assert simul_name in ['clump', 'comp', 'acc_dam', 'null', 'clump_comp', 'clump_acc_dam', 'var_clump_diam'], "Got: "+simul_name+". 'simul_name' must be one of 'clump', 'comp', 'acc_dam', 'null', 'clump_comp', 'clump_acc_dam', 'var_clump_diam'."
 
 if ('clump' in simul_name):
     scheme = PARAM_DICT_SIMUL['scheme']
@@ -84,89 +84,20 @@ LETTERS = ['A', 'B', 'C']
 replacement_val = config['PLOTTING']['replacement_val']
 band_type = config['PLOTTING']['band_type']
 #====================================================================
-''' Prepare experimental and simulation data for plotting '''
-
-GEN_WELL_SIMUL = np.asarray(df_simul.loc[:, 'GFP genomes (scaled)'])
-GEN_CELL_SIMUL = GEN_WELL_SIMUL / cell_count
-INF_WELL_SIMUL = np.empty((num_simulations, df_simul.shape[0]), float)
-
-for i in range(num_simulations):
-    INF_WELL_SIMUL[i, :] = df_simul.loc[:, 'GFP IU run='+str(i)]
-
-print("||||||", np.shape(INF_WELL_SIMUL), np.shape(np.mean(INF_WELL_SIMUL, axis=0)), "|||||||")
-
-INF_WELL_SIMUL_MEAN = np.mean(INF_WELL_SIMUL, axis=0)
-INF_CELL_SIMUL_MEAN = INF_WELL_SIMUL.ravel() / cell_count
-#--------------------------------------------------------------------
-GEN_WELL_SIMUL_U, INF_WELL_SIMUL_U, CIS_U, MINS_U, MAXS_U = MakeDataPretty(df_simul, 'GFP genomes (scaled)', 'GFP IU', num_simulations)
-
-GEN_CELL_SIMUL_U      = GEN_WELL_SIMUL_U / cell_count
-INF_WELL_SIMUL_MEAN_U = np.mean(INF_WELL_SIMUL_U, axis=1)
-INF_CELL_SIMUL_MEAN_U = INF_WELL_SIMUL_MEAN_U.ravel() / cell_count
-#--------------------------------------------------------------------
+''' Plot experimental data '''
 GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros = PrepareData(df_data, scale)
+
+ax.scatter(GEN_CELL_DATA, INF_CELL_DATA, facecolors='none', edgecolors=color, marker=marker, alpha=1)
+
+print("AHASDHALJDHAS:JDA:SLDKJA:SLKJDNA:LSKDA:", np.shape(GEN_CELL_DATA), np.shape(INF_CELL_DATA))
+
+g_data, n_data = PlotFit(ax, GEN_CELL_DATA, INF_CELL_DATA, LOWERS[sheet], UPPERS[sheet], color='b', linestyle='-.')
 #====================================================================
-''' Fit model to experimental and simulated data '''
-params = Parameters()
-params.add('gamma', value=.45, min=0, max=1, vary=True)
-params.add('n', value=1, min=0, max=3, vary=True)
-print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-result_data  = minimize(negLogLikeModel, params, method = 'differential_evolution', args=(GEN_CELL_DATA[LOWERS[sheet]:UPPERS[sheet]], INF_CELL_DATA[LOWERS[sheet]:UPPERS[sheet]]),)
-report_fit(result_data)
-print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-print("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=")
-result_simul = minimize(negLogLikeModel, params, method = 'differential_evolution', args=(GEN_CELL_SIMUL[LOWERS[sheet]:UPPERS[sheet]], INF_CELL_SIMUL_MEAN[LOWERS[sheet]:UPPERS[sheet]]),)
-report_fit(result_simul)
-print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-g_data = result_data.params['gamma'].value
-n_data = result_data.params['n'].value
-g_simul = result_simul.params['gamma'].value
-n_simul = result_simul.params['n'].value
-#g2 = result_simul_low.params['gamma'].value
-#n2 = result_simul_low.params['n'].value
+''' Plot simulation results '''
+GEN_CELL_SIMUL, INF_CELL_SIMUL = PlotSimul(ax, file, band_type, replacement_val)
 
-print("g_data = ", round(g_data,5), ", n_data = ", round(n_data,5), ", g_simul = ", round(g_simul,5), ", n_simul = ", round(n_simul,5), 'cell_count =', cell_count)#, ", g2 = ", g2, ", n2 = ", n2)
+g_simul, n_simul = PlotFit(ax, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet])
 
-x_data = GEN_CELL_DATA
-y_data = model(x_data, result_data.params)
-x_simul = GEN_CELL_SIMUL
-y_simul = model(x_simul, result_simul.params)
-#x2 = GFP_GEN_CELL
-#y2 = model(x2, result_simul_low.params)
-print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-print("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=")
-#====================================================================
-''' Replace values of 0 with a replacement value '''
-print("AHHHHHHHH ", np.shape(INF_WELL_SIMUL_U), np.shape(INF_WELL_SIMUL_MEAN_U))
-for i in range(np.shape(INF_WELL_SIMUL_MEAN_U)[0]):
-    if (band_type == 'minmax'):
-        if (MINS_U[i] <= 0):
-            MINS_U[i] = replacement_val * cell_count
-
-    elif (band_type == 'CIs'):
-        if (INF_WELL_SIMUL_MEAN_U[i] <= 0):
-            INF_WELL_SIMUL_MEAN_U[i] = replacement_val * cell_count
-#====================================================================
-''' Plot data and simulation results and best fit curves '''
-
-ax.scatter(GEN_CELL_DATA, INF_CELL_DATA, s=80, facecolors=color, edgecolors='none', marker=marker, alpha=.3)
-ax.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]], 'b-.', linewidth = 2)
-#--------------------------------------------------------------------
-if (num_simulations == 1):
-    ax.scatter(GEN_CELL_SIMUL, INF_WELL_SIMUL_MEAN.ravel() / cell_count, s=80, facecolors='none', edgecolors=color, marker=marker)
-
-elif (num_simulations > 1):
-    if (band_type == 'minmax'):
-        ax.fill_between(GEN_WELL_SIMUL_U / cell_count, MINS_U / cell_count, MAXS_U / cell_count, color='black', alpha=.3)
-    elif (band_type == 'CIs'):
-        ax.fill_between(GEN_WELL_SIMUL_U / cell_count, (INF_WELL_SIMUL_MEAN_U - CIS_U) / cell_count, (INF_WELL_SIMUL_MEAN_U + CIS_U) / cell_count, color='black', alpha=.3)
-
-    ax.plot(GEN_WELL_SIMUL_U / cell_count, INF_CELL_SIMUL_MEAN_U, color='black', linestyle='-')
-
-ax.plot(x_simul[LOWERS[sheet]:UPPERS[sheet]], y_simul[LOWERS[sheet]:UPPERS[sheet]], 'r--', linewidth = 2)
-
-#ax.scatter(GEN_CELL_DATA, INF_CELL_DATA, s=80, facecolors='green', edgecolors='none', marker='s')
-#ax.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]], color='pink', linestyle='-.', linewidth = 2)
 #====================================================================
 ''' Formatting '''
 legendD = mlines.Line2D([], [], color='b', linestyle='-.', markerfacecolor=color, markeredgecolor='none', markerfacecoloralt='none', marker=marker, alpha=0.6,
@@ -176,55 +107,35 @@ if (num_simulations == 1):
     legendS = mlines.Line2D([], [], color='y', linestyle='--', markerfacecolor='none', markeredgecolor=color, markerfacecoloralt='none', marker=marker,
                             markersize=10, label= "Simulation: n = " + str(round(n_simul, 3)))
 elif (num_simulations > 1):
-    legendS = mlines.Line2D([], [], color='k', linestyle='-', label=r'Simul. mean, $\overline{n} = $' + str(round(n_simul, 3)) + " ("+str(num_simulations)+" runs)")
+    legendS = mlines.Line2D([], [], color='r', linestyle='-', label=r'Simul. mean, $\overline{n} = $' + str(round(n_simul, 3)) + " ("+str(num_simulations)+" runs)")
 #--------------------------------------------------------------------
+BasicFormat(ax)
+
 xMin = 10**-3
 xMax = 10**3
 yMin = 10**-6
 yMax = 1
 
 ax.legend(handles = [legendD, legendS], loc='upper left', prop={'size': 8})
-ax.plot(np. linspace(xMin,xMax), np.linspace(yMin, yMax), 'k--', linewidth = 1)
-ax.set_xlabel('Genomes/cell')
-ax.set_ylabel('Infections/cell')
-ax.set_xscale('log')
-ax.set_yscale('log')
-ax.set_xlim(xMin, xMax)
-ax.set_ylim(yMin, yMax)
-#--------------------------------------------------------------------
-remove_str = ''
-if (PARAM_DICT_SIMUL['remove'] == 1):
-    remove_str = 'Successful virions\nremoved'
-elif (PARAM_DICT_SIMUL['remove'] == 0):
-    remove_str = 'Successful virions\nleft in'
+
+PlotText(ax, PARAM_DICT_SIMUL, xMin, xMax, yMin, yMax)
 
 if ('clump' in simul_name):
     if (simul_name == 'clump'):
         ax.set_title(SHEET_NAMES[sheet] + ' | Clumping')
-        ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+"\n"+remove_str)
     elif (simul_name == 'clump_comp'):
         ax.set_title(SHEET_NAMES[sheet] + ' | Clumping + Compensation')
-        ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax)+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL[kappa])+"\n"+remove_str)
     elif (simul_name == 'clump_acc_dam'):
         ax.set_title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
-        ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\nvMax = " + str(vMax) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
-    ax.text(1.1 * xMin, .05 * yMax, scheme)
-    ax.text(1.1 * xMin, .025 * yMax, distribution)
-
+    elif (simul_name == 'var_clump_diam'):
+        ax.set_title(SHEET_NAMES[sheet] + ' | Clumping + Var. Clump Diam.')
 elif (simul_name == 'acc_dam'):
-    ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\beta$ = ' + str(beta)+"\n"+remove_str)
-    ax.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
     ax.set_title(SHEET_NAMES[sheet] + ' | Acc. Damage')
-
 elif (simul_name == 'comp'):
-    ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", " + r'$\kappa$ = ' + str(kappa)+"\n"+remove_str)
-    ax.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}$')
     ax.set_title(SHEET_NAMES[sheet] + ' | Compensation')
-
 elif (simul_name == 'null'):
-    ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + '\nvMax = ' + str(vMax) + ", b = "+str(PARAM_DICT_SIMUL['b'])+"\n"+remove_str)
-    ax.text(1.1 * xMin, .1 * yMax, r'$\lambda_{num\_interactions}=\frac{genomes/well}{vMax}+b$')
     ax.set_title(SHEET_NAMES[sheet] + ' | Null')
+
 
 ax.text(.6 * xMin, 2.2 * yMax, '', fontsize=16, fontweight='bold', va='top', ha='right')
 #====================================================================

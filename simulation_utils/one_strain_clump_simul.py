@@ -201,7 +201,7 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
                         #    print("cell=", cell_num, ", poisson:", num_clump_interactions, ",len(CURR_CLUMP):", len(VIRIONS_IN_CURR_CLUMP), ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total/cell:", round(total/cell_count, 5))
 
                 if (cell_num == 0 or cell_num == int(.33 * cell_count) or cell_num == int(.66 * cell_count) or cell_num == cell_count-1):
-                    print("cell=", cell_num, ", poisson:", num_clump_interactions, ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total/cell:", round(total/cell_count, 5), ", total/genomes:", round(total/GEN_WELL_DATA[init], 5))
+                    print("cell:", cell_num, ", poisson:", num_clump_interactions, ", GFP_GENOMES[",init,"]:", GEN_WELL_DATA[init], ", len(GFP):", len(GFP_POOL), ", total/cell:", round(total/cell_count, 5), ", total/genomes:", round(total/GEN_WELL_DATA[init], 5))
             #--------------------------------------------------------
             else:
                 print("[][][][] OUT OF VIRIONS [][][][]")
