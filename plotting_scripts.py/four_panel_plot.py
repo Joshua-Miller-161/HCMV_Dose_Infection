@@ -23,8 +23,9 @@ ax_clump   = ax[0][1]
 ax_comp    = ax[1][1]
 
 x_text  = 2*10**-1
-x_label = 7*10**-4
-y_label = 1
+y_text  = 1.5*10**-6
+x_label = 1.7*10**-4
+y_label = 1.5
 #====================================================================
 ''' Files '''
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
@@ -87,7 +88,7 @@ cell_count = int(PARAM_DICT_DATA['cell_count'] / scale)
 GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros = PrepareData(df_data, scale)
 #====================================================================
 ''' Plot resistivity and infectivity histograms '''
-subpos    = [.7, 0.3, 0.3, 0.3] # [x,y,width,height]
+subpos    = [.65, 0.2, 0.3, 0.3] # [x,y,width,height]
 ax_inset  = add_subplot_axes(ax_null,subpos)
 
 x = np.linspace(-15, 15, 100000)
@@ -105,9 +106,9 @@ g_null, n_null = PlotFit(ax_null, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet],
 
 BasicFormat(ax_null)
 
-ax_null.text(10**-2, 2*10**-6, 'n='+str(round(n_null, 2)))
-ax_null.text(x_text, 2*10**-6, 'null model', fontsize=10, fontweight='bold')
-ax_null.text(x_label, y_label, 'A', fontsize=12, fontweight='bold')
+ax_null.text(10**-2, y_text, 'n='+str(round(n_null, 2)))
+ax_null.text(x_text, y_text, 'null model', fontsize=10, fontweight='bold')
+ax_null.text(x_label, y_label, 'A', fontsize=16, fontweight='bold')
 #====================================================================
 ''' Plot clump '''
 
@@ -117,12 +118,12 @@ g_clump, n_clump = PlotFit(ax_clump, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[shee
 
 BasicFormat(ax_clump)
 
-ax_clump.text(10**-2, 2*10**-6, 'n='+str(round(n_clump, 2)))
-ax_clump.text(x_text, 2*10**-6, 'Clump model', fontsize=10, fontweight='bold')
-ax_clump.text(x_label, y_label, 'B', fontsize=12, fontweight='bold')
+ax_clump.text(10**-2, y_text, 'n='+str(round(n_clump, 2)))
+ax_clump.text(x_text, y_text, 'Clump model', fontsize=10, fontweight='bold')
+ax_clump.text(x_label, y_label, 'B', fontsize=16, fontweight='bold')
 #====================================================================
 ''' Plot changing clump diameter '''
-subpos    = [.7, 0.3, 0.3, 0.3] # [x,y,width,height]
+subpos    = [.65, 0.2, 0.3, 0.3] # [x,y,width,height]
 ax_clump_inset  = add_subplot_axes(ax_clump,subpos)
 
 df_simul = pd.read_csv(clump_file)
@@ -150,9 +151,9 @@ g_acc_dam, n_acc_dam = PlotFit(ax_acc_dam, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWER
 
 BasicFormat(ax_acc_dam)
 
-ax_acc_dam.text(10**-2, 2*10**-6, 'n='+str(round(n_acc_dam, 2)))
-ax_acc_dam.text(x_text, 2*10**-6, 'Acc. Damage model', fontsize=10, fontweight='bold')
-ax_acc_dam.text(x_label, y_label, 'C', fontsize=12, fontweight='bold')
+ax_acc_dam.text(10**-2, y_text, 'n='+str(round(n_acc_dam, 2)))
+ax_acc_dam.text(x_text, y_text, 'Acc. Damage model', fontsize=10, fontweight='bold')
+ax_acc_dam.text(x_label, y_label, 'C', fontsize=16, fontweight='bold')
 #====================================================================
 ''' Plot compensation '''
 
@@ -162,9 +163,9 @@ g_comp, n_comp = PlotFit(ax_comp, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet],
 
 BasicFormat(ax_comp)
 
-ax_comp.text(10**-2, 2*10**-6, 'n='+str(round(n_comp, 2)))
-ax_comp.text(x_text, 2*10**-6, 'Compensation model', fontsize=10, fontweight='bold')
-ax_comp.text(x_label, y_label, 'D', fontsize=12, fontweight='bold')
+ax_comp.text(10**-2, y_text, 'n='+str(round(n_comp, 2)))
+ax_comp.text(x_text, y_text, 'Compensation model', fontsize=10, fontweight='bold')
+ax_comp.text(x_label, y_label, 'D', fontsize=16, fontweight='bold')
 #====================================================================
 plt.show()
 #====================================================================
