@@ -169,5 +169,5 @@ ax_comp.text(x_label, y_label, 'D', fontsize=16, fontweight='bold')
 #====================================================================
 plt.show()
 #====================================================================
-#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), 'four_panel.pdf'), bbox_inches='tight', pad_inches=0)
+fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), 'four_panel.pdf'), bbox_inches='tight', pad_inches=0)
 #====================================================================

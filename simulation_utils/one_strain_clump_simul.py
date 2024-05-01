@@ -6,7 +6,7 @@ sys.path.append(os.getcwd())
 from simulation_utils.utils import ClumpMetrics2, CalcNumClumps, Innoculation, Cell, Virion, Compensate, DiamFunc
 from misc.misc_utils import FlattenMeans, Trapezoid
 #====================================================================
-def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_name, save_clump_info=False):
+def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_name, sheet_name, save_clump_info=False, CLUMP_DIST_PARAMS_DICT=None):
     assert simul_name in ['clump', 'clump_comp', 'clump_acc_dam', 'var_clump_diam'], simul_name+" must be: 'clump', 'clump_acc_dam', 'clump_comp', 'var_clump_diam'."
     #----------------------------------------------------------------
     INF_WELL_SIMUL     = np.empty(GEN_WELL_DATA.shape[0], int)
@@ -89,24 +89,41 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
         # CLUMP_NUMS: # size 1 clumps, # size 2 clumps, ...
         # CLUMP_SIZES: 1,2,3,...,max clump size
         # radius: max clump size
-        CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
-                                    max_virions_in_clump,
-                                    diameter_nz,
-                                    mean_clump_diam=mean_clump_diam,
-                                    mean_virion_diam=PARAM_DICT['mean'], 
-                                    lb_virion_diam=PARAM_DICT['lb'], 
-                                    ub_virion_diam=PARAM_DICT['ub'],
-                                    scheme=PARAM_DICT['scheme'], 
-                                    distribution=PARAM_DICT['distribution'])
-        
+        CLUMP_NUMS = -99999999
+        if ((sheet_name == 'use_with_size_distribution') and not (simul_name == 'var_clump_diam')):
+            keys_   = list(CLUMP_DIST_PARAMS_DICT.keys())
+            keys__  = [int(float(key) / PARAM_DICT['scale']) for key in keys_]
+            key_idx = keys__.index(GEN_WELL_DATA[init])
+            PARAMS  = CLUMP_DIST_PARAMS_DICT[keys_[key_idx]]
+            print(" - - - - - skew =", PARAMS[0], ", mean =", PARAMS[1], ", stdev =", PARAMS[2], "- - - - - ")
+
+            CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
+                                        max_virions_in_clump,
+                                        diameter_nz,
+                                        skew_clump_diam=PARAMS[0],
+                                        mean_clump_diam=PARAMS[1],
+                                        std_clump_diam=PARAMS[2],
+                                        mean_virion_diam=PARAM_DICT['mean'], 
+                                        lb_virion_diam=PARAM_DICT['lb'], 
+                                        ub_virion_diam=PARAM_DICT['ub'],
+                                        scheme=PARAM_DICT['scheme'], 
+                                        distribution=PARAM_DICT['distribution'])
+        else:
+            CLUMP_NUMS = CalcNumClumps(GEN_WELL_DATA[init], 
+                                        max_virions_in_clump,
+                                        diameter_nz,
+                                        mean_clump_diam=mean_clump_diam,
+                                        mean_virion_diam=PARAM_DICT['mean'], 
+                                        lb_virion_diam=PARAM_DICT['lb'], 
+                                        ub_virion_diam=PARAM_DICT['ub'],
+                                        scheme=PARAM_DICT['scheme'], 
+                                        distribution=PARAM_DICT['distribution'])
+            
         CLUMP_SIZES = np.arange(1, len(CLUMP_NUMS)+1)
         radius = len(CLUMP_NUMS)
 
         CLUMP_IDS = ClumpMetrics2(CLUMP_NUMS)
-        # print(" ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ")
-        # print("CLUMP_NUMS=", CLUMP_NUMS, ", CLUMP_SIZES=", CLUMP_SIZES)
-        # print("CLUMP_IDS=", CLUMP_IDS)
-        # print(" ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ` ")
+        
         if save_clump_info:
             CLUMP_DICT[str(GEN_WELL_DATA[init])] = CLUMP_NUMS.tolist()
         #================================================================

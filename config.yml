@@ -1,12 +1,12 @@
 SIMULATION_PARAMETERS:
-  simul_name: 'var_clump_diam' # Type 'clump' for clump simulation,  
+  simul_name: 'clump' # Type 'clump' for clump simulation,  
                            # 'comp' for compensation simulation,
                            # 'acc_dam' for accrued damage simulation,
                            # 'clump_comp' for a simulation which combines clumping and compensation
                            # 'clump_acc_dam' for a simulation which combines clumping and accrued damage
                            # 'var_clump_diam' for a clump simulation where the average clump diameter increases as GENOMES/WELL increases
                            # 'null' for null simulation
-  sheet: 3 # Selects which experimental dataset to use. 0,1,2,3,4,5,6,7: Dose-infection experiments, 7: clump size distribution
+  sheet: 8 # Selects which experimental dataset to use. 0,1,2,3,4,5,6,7,8: Dose-infection experiments, 7: clump size distribution
   num_simulations: 2 # How many repeats of a given simulation to run.
   scale: 100 # Keep between 1 and 1000, bigger number=faster simulation
   gamma: .45 # ??
@@ -21,7 +21,8 @@ CLUMP_PARAMETERS:
     - 100000 # sheet=4 2020_08_12 TB_GFP_fibroblast
     - 100000 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 100000 # sheet=6 2021_08_13 ME_mC_epithelial
-    - 500000  # sheet=7 2022_11_02_TB_GFP_fib
+    - 500000 # sheet=7 2022_11_02_TB_GFP_fib
+    - 500000 # sheet=8 use_with_size_distribution
   mean_clump_diam: # Controls how many clumps visit a cell. Keep between 10000 and 1000000. Bigger=less clumps
     - 173.884  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 173.884 # sheet=1 2020_07_02 ME_GFP_fibroblast
@@ -31,6 +32,7 @@ CLUMP_PARAMETERS:
     - 173.884 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 173.884 # sheet=6 2021_08_13 ME_mC_epithelial
     - 173.884 # sheet=7 2022_11_02_TB_GFP_fib
+    - 173.884 # sheet=8 use_with_size_distribution
   vMaxD: # Controls how many clumps visit a cell. Keep between 10000 and 1000000. Bigger=less clumps
     - 18000  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 200000 # sheet=1 2020_07_02 ME_GFP_fibroblast
@@ -40,6 +42,7 @@ CLUMP_PARAMETERS:
     - 100000 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 100000 # sheet=6 2021_08_13 ME_mC_epithelial
     - 500000  # sheet=7 2022_11_02_TB_GFP_fib
+    - 500000 # sheet=8 use_with_size_distribution
   bD: # Controls how many clumps visit a cell. Keep between 10000 and 1000000. Bigger=less clumps
     - 170  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 170 # sheet=1 2020_07_02 ME_GFP_fibroblast
@@ -49,6 +52,7 @@ CLUMP_PARAMETERS:
     - 170 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 170 # sheet=6 2021_08_13 ME_mC_epithelial
     - 170  # sheet=7 2022_11_02_TB_GFP_fib
+    - 170 # sheet=8 use_with_size_distribution
 
   diameter_func: 'linear' # Changes (or fixes) the mean clump diameter. Only choose 'constant', 'linear', 'exponential' 
   distribution: 'fixed'   # How to same virion size (nm). Only choose 'uniform', 'normal', or 'fixed'
@@ -101,6 +105,7 @@ ACCRUED_DAMAGE_PARAMETERS:
     - 45000  # sheet=5 2020_09_14 TR_GFP_epithelial
     - 100000 # sheet=6 2021_08_13 ME_mC_epithelial
     - 70000  # sheet=7 2022_11_02_TB_GFP_fib
+    - 70000  # sheet=8 use_with_size_distribution
   beta: # Controls ???
     - 0      # sheet=0 2021_10_05 TB_GFP_epithelial
     - 0      # sheet=1 2020_07_02 ME_GFP_fibroblast
@@ -110,6 +115,7 @@ ACCRUED_DAMAGE_PARAMETERS:
     - -0.4   # sheet=5 2020_09_14 TR_GFP_epithelial
     - -0.4   # sheet=6 2021_08_13 ME_mC_epithelial
     - -1.0   # sheet=7 2022_11_02_TB_GFP_fib
+    - -1.0   # sheet=8 use_with_size_distribution
 
 COMPENSATION_PARAMETERS:
   vMax: # Controls how many virions visit a cell. Keep between 10000 and 1000000. Bigger=less virions
@@ -121,6 +127,7 @@ COMPENSATION_PARAMETERS:
     - 100000 # sheet=5 2020_09_14 TR_GFP_epithelial
     - 100000 # sheet=6 2021_08_13 ME_mC_epithelial
     - 40000  # sheet=7 2022_11_02_TB_GFP_fib
+    - 40000  # sheet=8 use_with_size_distribution
 
   kappa: # Strength of compensation. 0: 1: ?????
     - .35    # sheet=0 2021_10_05 TB_GFP_epithelial
@@ -131,6 +138,7 @@ COMPENSATION_PARAMETERS:
     - -0.05  # sheet=5 2020_09_14 TR_GFP_epithelial
     - -0.5   # sheet=6 2021_08_13 ME_mC_epithelial
     - 0.2    # sheet=7 2022_11_02_TB_GFP_fib
+    - 0.2    # sheet=8 use_with_size_distribution
 
 NULL_PARAMETERS:
   vMax: # Controls how many virions visit a cell. Keep between 10000 and 1000000. Bigger=less virions
@@ -142,6 +150,7 @@ NULL_PARAMETERS:
     - 80000  # sheet=5 2020_09_14 TR_GFP_epithelial
     - 100000 # sheet=6 2021_08_13 ME_mC_epithelial
     - 40000  # sheet=7 2022_11_02_TB_GFP_fib
+    - 40000  # sheet=8 use_with_size_distribution
   b: # ????
     - 0.1  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 0.1  # sheet=1 2020_07_02 ME_GFP_fibroblast
@@ -151,6 +160,7 @@ NULL_PARAMETERS:
     - 0.1  # sheet=5 2020_09_14 TR_GFP_epithelial
     - 0.1  # sheet=6 2021_08_13 ME_mC_epithelial
     - 0.1  # sheet=7 2022_11_02_TB_GFP_fib
+    - 0.1  # sheet=8 use_with_size_distribution
 
 CELL_PARAMETERS:
   mu_res: 12 # Mean cell resistivity
@@ -188,6 +198,7 @@ PLOTTING:
     - 0  # sheet=5 2020_09_14 TR_GFP_epithelial
     - 0  # sheet=6 2021_08_13 ME_mC_epithelial
     - 5  # sheet=7 2022_11_02_TB_GFP_fib
+    - 0  # sheet=8 use_with_size_distribution
   UPPERS: # Selects upper bound of data to use when calculating n (Powerlaw). Recommended that you do not change
     - 36  # sheet=0 2021_10_05 TB_GFP_epithelial
     - -15 # sheet=1 2020_07_02 ME_GFP_fibroblast
@@ -197,3 +208,4 @@ PLOTTING:
     - -1  # sheet=5 2020_09_14 TR_GFP_epithelial
     - -1  # sheet=6 2021_08_13 ME_mC_epithelial
     - 36  # sheet=7 2022_11_02_TB_GFP_fib
+    - 36  # sheet=8 use_with_size_distribution
