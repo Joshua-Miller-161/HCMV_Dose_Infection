@@ -166,7 +166,7 @@ def BasicFormat(ax, xMin=10**-3, xMax=10**3, yMin=10**-6, yMax=1, xlabel='Genome
     ax.set_xlim(xMin, xMax)
     ax.set_ylim(yMin, yMax)
 #====================================================================
-def PlotSimul(ax, file_path, band_type, replacement_val, x_name='GFP genomes (scaled)', y_name='GFP IU', color='green', marker='s'):
+def PlotSimul(ax, file_path, band_type, replacement_val, x_name='GFP genomes (scaled)', y_name='GFP IU', color='green', marker='s', scatter=True):
     df_simul = pd.read_csv(file_path)
     PARAM_DICT_SIMUL = ExtractParams(df_simul)
 
@@ -209,6 +209,9 @@ def PlotSimul(ax, file_path, band_type, replacement_val, x_name='GFP genomes (sc
             ax.fill_between(GEN_CELL_SIMUL_U, (INF_WELL_SIMUL_MEAN_U - CIS_U) / cell_count, (INF_WELL_SIMUL_MEAN_U + CIS_U) / cell_count, color='black', alpha=.3)
 
         ax.plot(GEN_CELL_SIMUL_U, INF_CELL_SIMUL_MEAN_U, color='black', linestyle='-')
+    
+    if (scatter == True):
+        ax.scatter(GEN_CELL_SIMUL_U, INF_CELL_SIMUL_MEAN_U, s=10, color='black', marker='o')
     #--------------------------------------------------------------------
     return GEN_CELL_SIMUL, INF_CELL_SIMUL_MEAN
 #====================================================================
