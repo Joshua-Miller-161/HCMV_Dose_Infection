@@ -147,14 +147,13 @@ def NegLogLike(params, x, y_data, model_type):
 def FlattenMeans(x_data, y_data, cutoff, replacement_value=0):
     x_data = np.asarray(x_data)
     y_data = np.asarray(y_data)
+    y_data_ = y_data
 
-    assert cutoff in x_data, str(cutoff) +" must be in x_data."
+    for i in range(np.shape(x_data)[0]):
+        if (x_data[i] < cutoff):
+            y_data_[i] = replacement_value
 
-    idx = np.where(x_data == cutoff)[0][0]
-    for i in range(idx + 1):
-        y_data[i] = replacement_value
-
-    return y_data 
+    return y_data_
 #====================================================================
 def GenerateClumpDiameter(num_virions, mean, lb, ub, scheme='linear', dist='uniform', target_x=None, target_prob=None):
     assert (scheme=='linear' or scheme=='regular_polygon'), "scheme must be 'linear' or 'regular_polygon'."

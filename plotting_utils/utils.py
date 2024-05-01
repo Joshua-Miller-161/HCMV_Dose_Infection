@@ -217,7 +217,7 @@ def PlotFit(ax, x_data, y_data, lower_idx=0, upper_idx=-1, yMin=10**-6, yMax=1, 
     params.add('gamma', value=.45, min=0, max=1, vary=True)
     params.add('n', value=1, min=0, max=3, vary=True)
     print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-    result  = minimize(negLogLikeModel, params, method = 'differential_evolution', args=(x_data[lower_idx:upper_idx], y_data[lower_idx:upper_idx]),)
+    result  = minimize(negLogLikeModel, params, method = 'differential_evolution', args=(x_data[lower_idx:upper_idx+1], y_data[lower_idx:upper_idx+1]),)
     report_fit(result)
     print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
     g = result.params['gamma'].value
@@ -225,7 +225,7 @@ def PlotFit(ax, x_data, y_data, lower_idx=0, upper_idx=-1, yMin=10**-6, yMax=1, 
 
     y_model = model(x_data, result.params)
 
-    ax.plot(x_data[lower_idx:upper_idx], y_model[lower_idx:upper_idx], color=color, linestyle=linestyle, linewidth = 1)
+    ax.plot(x_data[lower_idx:upper_idx+1], y_model[lower_idx:upper_idx+1], color=color, linestyle=linestyle, linewidth = 1)
     ax.axvline(x=x_data[lower_idx], ymin=yMin, ymax=yMax, color='black', alpha=0.3, zorder=0)
     ax.axvline(x=x_data[upper_idx], ymin=yMin, ymax=yMax, color='black', alpha=0.3, zorder=1)
 

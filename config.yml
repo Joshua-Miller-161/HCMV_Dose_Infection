@@ -57,6 +57,40 @@ CLUMP_PARAMETERS:
   ub: 300   # Upper bound of virion size (nm)
   mean: 230 # Average virion size (nm)
 
+  clump_dist_params_dict: # Obtained by fitting a skewed normal distribution to '2022_10_27_TB_size_distribution'
+    '15240000':           # Y-values whose corresponding diameter was less than 150nm was deemed to be debries, not virions
+      - 3.253             # And these were set to 0.
+      - 215.000           # Format: Genomes/well: skew, mean, stdev
+      - 170.000 
+    '6131312':
+      - 2.362
+      - 208.886
+      - 163.741
+    '2450310':
+      - 2.262
+      - 183.966
+      - 142.182 
+    '972623':
+      - 2.466
+      - 164.069
+      - 179.644
+    '383425':
+      - 40.516
+      - 158.826
+      - 272.690
+    '150101': 
+      - 23.461
+      - 155.605
+      - 244.017
+    '58346':
+      - 65.266
+      - 161.420
+      - 150.000
+    '16367':
+      - 17556.777
+      - 164.153
+      - 250.000
+
 ACCRUED_DAMAGE_PARAMETERS:
   vMax: # Controls how many virions visit a cell. Keep between 10000 and 1000000. Bigger=less virions
     - 20000  # sheet=0 2021_10_05 TB_GFP_epithelial
@@ -149,7 +183,7 @@ PLOTTING:
     - 2  # sheet=0 2021_10_05 TB_GFP_epithelial
     - 20 # sheet=1 2020_07_02 ME_GFP_fibroblast
     - 0  # sheet=2 2020_05_29 TR_GFP_fibroblast
-    - 6  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 0  # sheet=3 2021_07_13 GFP_TB_fibroblast
     - 0  # sheet=4 2020_08_12 TB_GFP_fibroblast
     - 0  # sheet=5 2020_09_14 TR_GFP_epithelial
     - 0  # sheet=6 2021_08_13 ME_mC_epithelial
@@ -158,7 +192,7 @@ PLOTTING:
     - 36  # sheet=0 2021_10_05 TB_GFP_epithelial
     - -15 # sheet=1 2020_07_02 ME_GFP_fibroblast
     - -1  # sheet=2 2020_05_29 TR_GFP_fibroblast
-    - 36  # sheet=3 2021_07_13 GFP_TB_fibroblast
+    - 15  # sheet=3 2021_07_13 GFP_TB_fibroblast
     - -1  # sheet=4 2020_08_12 TB_GFP_fibroblast
     - -1  # sheet=5 2020_09_14 TR_GFP_epithelial
     - -1  # sheet=6 2021_08_13 ME_mC_epithelial

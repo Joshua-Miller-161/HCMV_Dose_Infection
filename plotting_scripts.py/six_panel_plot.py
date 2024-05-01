@@ -110,7 +110,7 @@ ax_data.text(10**-2, 2*10**-6, 'n='+str(round(n_data, 5))+'\n'+SHEET_NAMES[sheet
 #====================================================================
 ''' Plot resistivity and infectivity histograms '''
 subpos    = [.7, 0.3, 0.3, 0.3] # [x,y,width,height]
-ax_inset  = add_subplot_axes(ax_data,subpos)
+ax_inset  = add_subplot_axes(ax_null,subpos)
 
 x = np.linspace(-15, 15, 100000)
 ax_inset.plot(x, norm.pdf(x, mu_res, std_res), 'k-', label='Cell')
@@ -182,5 +182,5 @@ ax_acc_dam.text(10**-2, 2*10**-6, 'n='+str(round(n_acc_dam, 5))+'\nAcc. Damage m
 #====================================================================
 plt.show()
 #====================================================================
-fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), 'six_panel.pdf'), bbox_inches='tight', pad_inches=0)
+#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), 'six_panel.pdf'), bbox_inches='tight', pad_inches=0)
 #====================================================================
