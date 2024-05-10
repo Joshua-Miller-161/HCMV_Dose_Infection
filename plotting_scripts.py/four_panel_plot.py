@@ -22,16 +22,23 @@ ax_acc_dam = ax[1][0]
 ax_clump   = ax[0][1]
 ax_comp    = ax[1][1]
 
-x_text  = 2*10**-1
-y_text  = 1.5*10**-6
+x_text  = 2*10**-3
+y_text  = 5*10**-1
 x_label = 1.7*10**-4
 y_label = 1.5
+yMin_1 = .25
+yMax_1 = .65
+yMin_2 = .55
+yMax_2 = .9
+x_legend = .01
+y_legend = .95
 #====================================================================
 ''' Files '''
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
-               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib']
+               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib',
+               'use_with_size_distribution']
 
 data_file    = "data/Experimental_data_Ed_Josh.xlsx"
 null_file    = "simulation_results/null/NullSimul_2021_07_13 GFP_TB_fibroblast_s=50_vMax=1600.0_b=0.1_r=1_n=10.csv"
@@ -77,7 +84,7 @@ band_type = config['PLOTTING']['band_type']
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
-               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib']
+               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib', 'use_with_size_distribution']
 df_data = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name=SHEET_NAMES[sheet])
 
 #--------------------------------------------------------------------
@@ -87,43 +94,66 @@ cell_count = int(PARAM_DICT_DATA['cell_count'] / scale)
 
 GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros = PrepareData(df_data, scale)
 #====================================================================
+''' Plot null '''
+
+GEN_CELL_SIMUL, INF_CELL_SIMUL = PlotSimul(ax_null, null_file, band_type, replacement_val)
+
+g_null, n_null = PlotFit(ax_null, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet],
+                         yMin_1=yMin_1, yMax_1=yMax_1, yMin_2=yMin_2, yMax_2=0.75)
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+BasicFormat(ax_null)
+
+ax_null.text(x_text, y_text, 'Null', fontsize=10, fontweight='bold')
+ax_null.text(x_label, y_label, 'A', fontsize=16, fontweight='bold')
+
+PARAM_DICT_SIMUL = ExtractParams(pd.read_csv(null_file))
+num_simulations = PARAM_DICT_SIMUL['num_simulations']
+
+legendSimul = mlines.Line2D([], [], color='k', linestyle='-', 
+                            markerfacecolor='black', markeredgecolor='none', markerfacecoloralt='none', marker='o', markersize=5,
+                            label = "Simulation" + " ("+str(int(num_simulations))+" runs)")
+legendN = mlines.Line2D([], [], color='r', linestyle='-', 
+                        label='n=' + str(round(n_null, 3)))
+
+ax_null.legend(handles = [legendSimul, legendN], loc='upper left', prop={'size': 8}, bbox_to_anchor=(x_legend, y_legend))
+#====================================================================
 ''' Plot resistivity and infectivity histograms '''
-subpos    = [.65, 0.2, 0.3, 0.3] # [x,y,width,height]
+subpos    = [.6, 0.13, 0.35, 0.35] # [x,y,width,height]
 ax_inset  = add_subplot_axes(ax_null,subpos)
 
 x = np.linspace(-15, 15, 100000)
 ax_inset.plot(x, norm.pdf(x, mu_res, std_res), 'k-', label='Cell')
 ax_inset.plot(x, norm.pdf(x, mu_inf, std_inf), color=color, linestyle='-', label='Virus')
 
-ax_inset.set_ylabel('Freq.', fontsize=5)
+ax_inset.set_ylabel('Frequency', fontsize=6)
 ax_inset.legend(loc='upper left', prop={'size':5})
-#====================================================================
-''' Plot null '''
-
-GEN_CELL_SIMUL, INF_CELL_SIMUL = PlotSimul(ax_null, null_file, band_type, replacement_val)
-
-g_null, n_null = PlotFit(ax_null, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet])
-
-BasicFormat(ax_null)
-
-ax_null.text(10**-2, y_text, 'n='+str(round(n_null, 2)))
-ax_null.text(x_text, y_text, 'null model', fontsize=10, fontweight='bold')
-ax_null.text(x_label, y_label, 'A', fontsize=16, fontweight='bold')
 #====================================================================
 ''' Plot clump '''
 
 GEN_CELL_SIMUL, INF_CELL_SIMUL = PlotSimul(ax_clump, clump_file, band_type, replacement_val)
 
-g_clump, n_clump = PlotFit(ax_clump, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet])
+g_clump, n_clump = PlotFit(ax_clump, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet],
+                           yMin_1=yMin_1, yMax_1=yMax_1, yMin_2=yMin_2, yMax_2=yMax_2)
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 BasicFormat(ax_clump)
 
-ax_clump.text(10**-2, y_text, 'n='+str(round(n_clump, 2)))
-ax_clump.text(x_text, y_text, 'Clump model', fontsize=10, fontweight='bold')
+ax_clump.text(x_text, y_text, 'Clump', fontsize=10, fontweight='bold')
 ax_clump.text(x_label, y_label, 'B', fontsize=16, fontweight='bold')
+
+PARAM_DICT_SIMUL = ExtractParams(pd.read_csv(clump_file))
+num_simulations = PARAM_DICT_SIMUL['num_simulations']
+
+legendSimul = mlines.Line2D([], [], color='k', linestyle='-', 
+                            markerfacecolor='black', markeredgecolor='none', markerfacecoloralt='none', marker='o', markersize=5,
+                            label = "Simulation ("+str(int(num_simulations))+" runs)")
+legendN = mlines.Line2D([], [], color='r', linestyle='-',
+                        label='n=' + str(round(n_clump, 3)))
+
+ax_clump.legend(handles = [legendSimul, legendN], loc='upper left', prop={'size': 8}, bbox_to_anchor=(x_legend, y_legend))
 #====================================================================
 ''' Plot changing clump diameter '''
-subpos    = [.65, 0.2, 0.3, 0.3] # [x,y,width,height]
+subpos    = [.6, 0.13, 0.35, 0.35] # [x,y,width,height]
 ax_clump_inset  = add_subplot_axes(ax_clump,subpos)
 
 df_simul = pd.read_csv(clump_file)
@@ -147,27 +177,51 @@ ax_clump_inset.legend(loc='upper left', prop={'size':4})
 
 GEN_CELL_SIMUL, INF_CELL_SIMUL = PlotSimul(ax_acc_dam, acc_dam_file, band_type, replacement_val)
 
-g_acc_dam, n_acc_dam = PlotFit(ax_acc_dam, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet])
+g_acc_dam, n_acc_dam = PlotFit(ax_acc_dam, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet],
+                               yMin_1=yMin_1, yMax_1=yMax_1, yMin_2=yMin_2, yMax_2=yMax_2)
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 BasicFormat(ax_acc_dam)
 
-ax_acc_dam.text(10**-2, y_text, 'n='+str(round(n_acc_dam, 2)))
-ax_acc_dam.text(x_text, y_text, 'Acc. Damage model', fontsize=10, fontweight='bold')
+ax_acc_dam.text(x_text, y_text, 'Accrued Damage', fontsize=10, fontweight='bold')
 ax_acc_dam.text(x_label, y_label, 'C', fontsize=16, fontweight='bold')
+
+PARAM_DICT_SIMUL = ExtractParams(pd.read_csv(acc_dam_file))
+num_simulations = PARAM_DICT_SIMUL['num_simulations']
+
+legendSimul = mlines.Line2D([], [], color='k', linestyle='-', 
+                            markerfacecolor='black', markeredgecolor='none', markerfacecoloralt='none', marker='o', markersize=5,
+                            label = "Simulation ("+str(int(num_simulations))+" runs)")
+legendN = mlines.Line2D([], [], color='r', linestyle='-',
+                        label='n=' + str(round(n_acc_dam, 3)))
+
+ax_acc_dam.legend(handles = [legendSimul, legendN], loc='upper left', prop={'size': 8}, bbox_to_anchor=(x_legend, y_legend))
 #====================================================================
 ''' Plot compensation '''
 
 GEN_CELL_SIMUL, INF_CELL_SIMUL = PlotSimul(ax_comp, comp_file, band_type, replacement_val)
 
-g_comp, n_comp = PlotFit(ax_comp, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet])
+g_comp, n_comp = PlotFit(ax_comp, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet],
+                         yMin_1=yMin_1, yMax_1=yMax_1, yMin_2=yMin_2, yMax_2=yMax_2)
 
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 BasicFormat(ax_comp)
 
-ax_comp.text(10**-2, y_text, 'n='+str(round(n_comp, 2)))
-ax_comp.text(x_text, y_text, 'Compensation model', fontsize=10, fontweight='bold')
+ax_comp.text(x_text, y_text, 'Compensation', fontsize=10, fontweight='bold')
 ax_comp.text(x_label, y_label, 'D', fontsize=16, fontweight='bold')
+
+PARAM_DICT_SIMUL = ExtractParams(pd.read_csv(comp_file))
+num_simulations = PARAM_DICT_SIMUL['num_simulations']
+
+legendSimul = mlines.Line2D([], [], color='k', linestyle='-', 
+                            markerfacecolor='black', markeredgecolor='none', markerfacecoloralt='none', marker='o', markersize=5,
+                            label = "Simulation ("+str(int(num_simulations))+" runs)")
+legendN = mlines.Line2D([], [], color='r', linestyle='-',
+                        label='n=' + str(round(n_comp, 3)))
+
+ax_comp.legend(handles = [legendSimul, legendN], loc='upper left', prop={'size': 8}, bbox_to_anchor=(x_legend, y_legend))
 #====================================================================
 plt.show()
 #====================================================================
-fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), 'four_panel.pdf'), bbox_inches='tight', pad_inches=0)
+fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), 'four_panel_v3.pdf'), bbox_inches='tight', pad_inches=0)
 #====================================================================

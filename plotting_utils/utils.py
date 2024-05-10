@@ -1,15 +1,18 @@
 import numpy as np
 import pandas as pd
 from itertools import chain
+from scipy.stats import chisquare
 import sys
 import os
 from lmfit import Parameters, minimize, report_fit
 import matplotlib.pyplot as plt
+import random
 
 sys.path.append(os.getcwd())
 from misc.misc_utils import ExtractParams
 #====================================================================
 def model(x, params):
+    #print('MODEL, MODEL, MODEL, MODEL, MODEL')
     try: # Get parameters
         g = params['gamma'].value
         n = params['n'].value
@@ -20,7 +23,18 @@ def model(x, params):
 
     return y
 #====================================================================
-def negLogLikeModel(params, xData, yData):
+def model_n1(x, params):
+    #print('MODEL_N1, MODEL_N1, MODEL_N1, MODEL_N1, MODEL_N1')
+    try: # Get parameters
+        g = params['gamma'].value
+    except KeyError:
+        g = params
+
+    y = 1 - np.exp(-g * x)
+
+    return y
+#====================================================================
+def negLogLikeModel(params, xData, yData, fix_n):
     new_xData = []
     new_yData = []
 
@@ -29,7 +43,15 @@ def negLogLikeModel(params, xData, yData):
             new_xData.append(xData[i])
             new_yData.append(yData[i])
 
-    model_result = model(new_xData, params)
+    new_xData = np.asarray(new_xData)
+    new_yData = np.asarray(new_yData)
+
+    if fix_n:
+        #print("ASFLJSHF:ASJFHAS:FJASF: fix_n=", fix_n, "SD:LKASDAS")
+        model_result = model_n1(new_xData, params)
+    else:
+        #print("ASFLJSHF:ASJFHAS:FJASF: fix_n=", fix_n, "SD:LKASDAS")
+        model_result = model(new_xData, params)
 
     nll = 0
     epsilon = 10**-10
@@ -128,11 +150,11 @@ def PlotText(ax, PARAM_DICT_SIMUL, xMin, xMax, yMin, yMax):
 
     if ('clump' in PARAM_DICT_SIMUL['simul_name']):
         if (PARAM_DICT_SIMUL['simul_name'] == 'clump'):
-            ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax'])+"\n"+remove_str)
+            ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax'])+"\n"+remove_str)
         elif (PARAM_DICT_SIMUL['simul_name'] == 'clump_comp'):
-            ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax'])+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL['kappa'])+"\n"+remove_str)
+            ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax'])+' '+r'$\kappa=$'+str(PARAM_DICT_SIMUL['kappa'])+"\n"+remove_str)
         elif (PARAM_DICT_SIMUL['simul_name'] == 'clump_acc_dam'):
-            ax.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax']) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
+            ax.text(1.1 * xMin, .01 * yMax, "Scale: 1/" + str(PARAM_DICT_SIMUL['scale']) + ", " + r'$ \gamma = $' + str(PARAM_DICT_SIMUL['gamma']) + "\nvMax = " + str(PARAM_DICT_SIMUL['vMax']) + ' ' + r'$\beta=$'+str(PARAM_DICT_SIMUL['beta'])+"\n"+remove_str)
         
         elif (PARAM_DICT_SIMUL['simul_name'] == 'var_clump_diam'):
             if (PARAM_DICT_SIMUL['diameter_func'] == 'constant'):
@@ -166,12 +188,17 @@ def BasicFormat(ax, xMin=10**-3, xMax=10**3, yMin=10**-6, yMax=1, xlabel='Genome
     ax.set_xlim(xMin, xMax)
     ax.set_ylim(yMin, yMax)
 #====================================================================
-def PlotSimul(ax, file_path, band_type, replacement_val, x_name='GFP genomes (scaled)', y_name='GFP IU', color='green', marker='s', scatter=True):
+def PlotSimul(ax, file_path, band_type, replacement_val, x_name='GFP genomes (scaled)', y_name='GFP IU', 
+              color='green', marker='^', s=20, scatter=True, return_gen_well=False):
     df_simul = pd.read_csv(file_path)
     PARAM_DICT_SIMUL = ExtractParams(df_simul)
 
-    num_simulations = int(PARAM_DICT_SIMUL['num_simulations'])
-    cell_count      = PARAM_DICT_SIMUL['cell_count']
+    num_simulations = 0
+    for key in df_simul.keys():
+        if ("IU run" in key):
+            num_simulations += 1
+    print("ASDOASJD:ASKDJASDKASDAS:LDKNAS:DKLASD:KLASD:LASD:LASD:ASDLK", num_simulations)
+    cell_count     = PARAM_DICT_SIMUL['cell_count']
 
     GEN_WELL_SIMUL = np.asarray(df_simul.loc[:, x_name])
     GEN_CELL_SIMUL = GEN_WELL_SIMUL / cell_count
@@ -200,7 +227,7 @@ def PlotSimul(ax, file_path, band_type, replacement_val, x_name='GFP genomes (sc
                 INF_WELL_SIMUL_MEAN_U[i] = replacement_val * cell_count
     #--------------------------------------------------------------------
     if (num_simulations == 1):
-        ax.scatter(GEN_CELL_SIMUL, INF_WELL_SIMUL / cell_count, s=80, facecolors='none', edgecolors=color, marker=marker)
+        ax.scatter(GEN_CELL_SIMUL, INF_WELL_SIMUL / cell_count, s=s, facecolors='none', edgecolors=color, marker=marker)
 
     elif (num_simulations > 1):
         if (band_type == 'minmax'):
@@ -211,28 +238,67 @@ def PlotSimul(ax, file_path, band_type, replacement_val, x_name='GFP genomes (sc
         ax.plot(GEN_CELL_SIMUL_U, INF_CELL_SIMUL_MEAN_U, color='black', linestyle='-')
     
     if (scatter == True):
-        ax.scatter(GEN_CELL_SIMUL_U, INF_CELL_SIMUL_MEAN_U, s=10, color='black', marker='o')
+        ax.scatter(GEN_CELL_SIMUL_U, INF_CELL_SIMUL_MEAN_U, s=s, color=color, marker=marker)
     #--------------------------------------------------------------------
-    return GEN_CELL_SIMUL, INF_CELL_SIMUL_MEAN
+    if not return_gen_well:
+        return GEN_CELL_SIMUL, INF_CELL_SIMUL_MEAN
+    else:
+        return GEN_WELL_SIMUL, GEN_CELL_SIMUL, INF_WELL_SIMUL, INF_CELL_SIMUL_MEAN
 #====================================================================
-def PlotFit(ax, x_data, y_data, lower_idx=0, upper_idx=-1, yMin=10**-6, yMax=1, color='red', linestyle='-'):
-    params = Parameters()
-    params.add('gamma', value=.45, min=0, max=1, vary=True)
-    params.add('n', value=1, min=0, max=3, vary=True)
-    print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-    result  = minimize(negLogLikeModel, params, method = 'differential_evolution', args=(x_data[lower_idx:upper_idx+1], y_data[lower_idx:upper_idx+1]),)
-    report_fit(result)
-    print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-    g = result.params['gamma'].value
-    n = result.params['n'].value
+def PlotFit(ax, x_data, y_data, lower_idx=0, upper_idx=-1, 
+            plot_vlines=False, yMin_1=0, yMax_1=1, yMin_2=0, yMax_2=1, 
+            plot_fit_markers=False, s=5, marker_color='green', marker='^',
+            g_min=0, g_max=1, n_min=0, n_max=3,
+            color='red', linestyle='-', n_fits=1):
+    
+    G_VALS   = np.ones(n_fits, float)
+    N_NALS   = np.ones(n_fits, float)
+    NLL_VALS_GOOD = np.ones(n_fits, float)
+    NLL_VALS_BAD  = np.ones(n_fits, float)
+    for i in range(n_fits):
+        params = Parameters()
+        params.add('gamma', value=random.uniform(g_min, g_max), min=g_min, max=g_max)
+        params.add('n', value=random.uniform(n_min, n_max), min=n_min, max=n_max)
+        #print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
+        result  = minimize(negLogLikeModel, params, method='differential_evolution', args=(x_data[lower_idx:upper_idx+1], y_data[lower_idx:upper_idx+1], False),)
+        #report_fit(result)
+        #print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
+        G_VALS[i]        = result.params['gamma'].value
+        N_NALS[i]        = result.params['n'].value
+        NLL_VALS_GOOD[i] = negLogLikeModel(result.params, x_data[lower_idx:upper_idx+1], y_data[lower_idx:upper_idx+1], False)
+        #----------------------------------------------------------------
+        # Get bad fit by fixing n=1
+        params_1 = Parameters()
+        params_1.add('gamma', value=random.uniform(g_min, g_max), min=g_min, max=g_max)
 
-    y_model = model(x_data, result.params)
+        result_1  = minimize(negLogLikeModel, params_1, method='differential_evolution', args=(x_data[lower_idx:upper_idx+1], y_data[lower_idx:upper_idx+1], True),)
+
+        NLL_VALS_BAD[i] = negLogLikeModel(result_1.params, x_data[lower_idx:upper_idx+1], y_data[lower_idx:upper_idx+1], True)
+
+        #print('n_vary:', NLL_VALS_GOOD[i], ", n_fixed:", NLL_VALS_BAD[i])
+    #----------------------------------------------------------------
+    # Get p-value
+    res = chisquare([NLL_VALS_GOOD, NLL_VALS_BAD], axis=None)
+    p = res.pvalue
+    #----------------------------------------------------------------
+
+    #y_model = model(x_data, result.params)
+    best_idx = np.argmin(NLL_VALS_GOOD)
+    g_best, n_best = G_VALS[best_idx], N_NALS[best_idx]
+    print("g_best =", round(g_best, 5), ", n_best =", round(n_best, 5), "best_idx =", best_idx, ", p =", p)
+    y_model = 1 - np.exp(-g_best * x_data**n_best)
 
     ax.plot(x_data[lower_idx:upper_idx+1], y_model[lower_idx:upper_idx+1], color=color, linestyle=linestyle, linewidth = 1)
-    ax.axvline(x=x_data[lower_idx], ymin=yMin, ymax=yMax, color='black', alpha=0.3, zorder=0)
-    ax.axvline(x=x_data[upper_idx], ymin=yMin, ymax=yMax, color='black', alpha=0.3, zorder=1)
+    
+    if plot_vlines:
+        ax.axvline(x=x_data[lower_idx], ymin=yMin_1, ymax=yMax_1, color=color, alpha=0.3, zorder=0)
+        ax.axvline(x=x_data[upper_idx], ymin=yMin_2, ymax=yMax_2, color=color, alpha=0.3, zorder=1)
+    
+    if plot_fit_markers:
+        ax.scatter(x_data[lower_idx:upper_idx+1], y_data[lower_idx:upper_idx+1], 
+                   s=s, facecolors=marker_color, marker=marker)
 
-    return g, n
+    return g_best, n_best, p
 #====================================================================
 # Shoutout Pablo on StackExchange
 def add_subplot_axes(ax, rect, axisbg='w'):
@@ -256,3 +322,56 @@ def add_subplot_axes(ax, rect, axisbg='w'):
     subax.xaxis.set_tick_params(labelsize=x_labelsize)
     subax.yaxis.set_tick_params(labelsize=y_labelsize)
     return subax
+#====================================================================
+def PlotVirionsInClumpFreq(ax, CLUMP_DICT, GEN_WELL_SIMUL, legend_size=4, 
+                           scatter=True, markersize=50, cell_count=None, round_digits=5):
+    CLUMP_MARKERS = ['s', '^', 'o']
+
+    NUM_CLUMPS_2  = CLUMP_DICT[str(GEN_WELL_SIMUL[len(GEN_WELL_SIMUL) - 1])]
+    CLUMP_SIZES_2 = np.arange(1, len(NUM_CLUMPS_2)+1)
+    if not scatter:
+        if not (cell_count == None):
+            ax.vlines(CLUMP_SIZES_2, 0, NUM_CLUMPS_2, colors='goldenrod', lw=3, alpha=0.7, zorder=0,
+                      label = 'Gen./cell = ' + str(round(GEN_WELL_SIMUL[len(GEN_WELL_SIMUL) - 1] / cell_count, round_digits)))
+        else:
+            ax.vlines(CLUMP_SIZES_2, 0, NUM_CLUMPS_2, colors='goldenrod', lw=3, alpha=0.7, zorder=0,
+                      label = 'Gen./well = ' + str(GEN_WELL_SIMUL[len(GEN_WELL_SIMUL) - 1]))
+    else:
+        ax.vlines(CLUMP_SIZES_2, 0, NUM_CLUMPS_2, colors='goldenrod', lw=3, alpha=0.7, zorder=0)
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    NUM_CLUMPS_1  = CLUMP_DICT[str(GEN_WELL_SIMUL[int(len(GEN_WELL_SIMUL) / 2)])]
+    CLUMP_SIZES_1 = np.arange(1, np.shape(NUM_CLUMPS_1)[0]+1)
+
+    if not scatter:
+        if not (cell_count == None):
+            ax.vlines(CLUMP_SIZES_1, 0, NUM_CLUMPS_1, colors='r', lw=3, alpha=0.7, zorder=1,
+                      label = 'Gen./cell = ' + str(round(GEN_WELL_SIMUL[int(len(GEN_WELL_SIMUL) / 2)] / cell_count, round_digits)))
+        else:
+            ax.vlines(CLUMP_SIZES_1, 0, NUM_CLUMPS_1, colors='r', lw=3, alpha=0.7, zorder=1,
+                      label = 'Gen./well = ' + str(GEN_WELL_SIMUL[int(len(GEN_WELL_SIMUL) / 2)]))
+    else:
+        ax.vlines(CLUMP_SIZES_1, 0, NUM_CLUMPS_1, colors='r', lw=3, alpha=0.5, zorder=1)
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    NUM_CLUMPS_0 = CLUMP_DICT[str(GEN_WELL_SIMUL[0])]
+    CLUMP_SIZES_0 = np.arange(1, np.shape(NUM_CLUMPS_0)[0]+1)
+    if not scatter:
+        if not (cell_count == None):
+            ax.vlines(CLUMP_SIZES_0, 0, NUM_CLUMPS_0, colors='b', lw=3, alpha=0.7, zorder=2,
+                      label = 'Gen./cell = ' + str(round(GEN_WELL_SIMUL[0] / cell_count, round_digits)))
+        else:
+            ax.vlines(CLUMP_SIZES_0, 0, NUM_CLUMPS_0, colors='b', lw=3, alpha=0.7, zorder=2,
+                      label = 'Gen./well = ' + str(GEN_WELL_SIMUL[0]))
+    else:
+        ax.vlines(CLUMP_SIZES_0, 0, NUM_CLUMPS_0, colors='b', lw=3, alpha=0.5, zorder=2)
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    if scatter:
+        if (cell_count == None):
+            ax.scatter(CLUMP_SIZES_2, NUM_CLUMPS_2, s = markersize, color='goldenrod', edgecolors='black', marker=CLUMP_MARKERS[2], label = 'Gen./well = ' + str(GEN_WELL_SIMUL[len(GEN_WELL_SIMUL) - 1]))
+            ax.scatter(CLUMP_SIZES_1, NUM_CLUMPS_1, s = markersize, color='red', edgecolors ='black', marker=CLUMP_MARKERS[1], label='Gen./well = ' + str(GEN_WELL_SIMUL[int(len(GEN_WELL_SIMUL) / 2)]))
+            ax.scatter(CLUMP_SIZES_0, NUM_CLUMPS_0, s = markersize, color='blue', edgecolors='black', marker=CLUMP_MARKERS[0], label='Gen./well = ' + str(GEN_WELL_SIMUL[0]))
+        else:
+            ax.scatter(CLUMP_SIZES_2, NUM_CLUMPS_2, s = markersize, color='goldenrod', edgecolors='black', marker=CLUMP_MARKERS[2], label = 'Gen./cell = ' + str(round(GEN_WELL_SIMUL[len(GEN_WELL_SIMUL) - 1] / cell_count, round_digits)))
+            ax.scatter(CLUMP_SIZES_1, NUM_CLUMPS_1, s = markersize, color='red', edgecolors ='black', marker=CLUMP_MARKERS[1], label='Gen./cell = ' + str(round(GEN_WELL_SIMUL[int(len(GEN_WELL_SIMUL) / 2)] / cell_count, round_digits)))
+            ax.scatter(CLUMP_SIZES_0, NUM_CLUMPS_0, s = markersize, color='blue', edgecolors='black', marker=CLUMP_MARKERS[0], label='Gen./cell = ' + str(round(GEN_WELL_SIMUL[0] / cell_count, round_digits))) 
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ax.legend(loc='upper right', prop={'size':legend_size})

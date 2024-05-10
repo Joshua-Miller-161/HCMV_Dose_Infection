@@ -22,7 +22,7 @@ colors = ['r', 'g', 'b', 'm', 'c', 'y', 'k', 'pink']
 num_gauss = 1
 flatten_means = True
 cutoff = 150
-gen_well = 7
+gen_well = 4
 #====================================================================
 ''' Import data '''
 gen_well_inf_df = pd.read_excel("data/Experimental_data_Ed_Josh.xlsx", sheet_name='2022_11_02_TB_GFP_fib')
@@ -70,9 +70,9 @@ result_log = minimize(NegLogLike, params_log,
                        args=(DIAMETERS, PERC_IN_SAMPLE, 'lognormal'),)
 
 params_skew = CreateMuSigAmp(num_gauss=num_gauss, model_type='skewnormal', 
-                             min_mu=60, max_mu=250, 
-                             min_skew=20, max_skew=50000,
-                             min_std=1, max_std=250,
+                             min_mu=60, max_mu=350, 
+                             min_skew=1, max_skew=50,
+                             min_std=1, max_std=600,
                              min_amp=0.1, max_amp=2)
 result_skew = minimize(NegLogLike, params_skew, 
                        method = 'differential_evolution', 

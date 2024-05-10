@@ -240,3 +240,20 @@ def Replace(input_string, target, replacement):
         input_string.replace(target, replacement)
 
     return input_string
+#====================================================================
+def AverageDicts(my_dict, my_dict2, iter):
+    my_dict_avg = {}
+    for key in my_dict:
+        if key in my_dict2:
+            # Find the longer list
+            longest_list = my_dict[key] if len(my_dict[key]) > len(my_dict2[key]) else my_dict2[key]
+            # Compute the average element-wise
+            avg_list = []
+            for i in range(len(longest_list)):
+                val1 = my_dict[key][i] if i < len(my_dict[key]) else 0
+                val2 = my_dict2[key][i] if i < len(my_dict2[key]) else 0
+                avg_list.append(((iter / (iter + 1)) * val1 + (1 / (iter + 1)) * val2))
+            my_dict_avg[key] = avg_list
+        else:
+            print(f"Key '{key}' not found in my_dict2.")
+    return my_dict_avg

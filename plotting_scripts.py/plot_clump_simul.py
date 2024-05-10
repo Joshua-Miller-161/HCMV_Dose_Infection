@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import pandas as pd
-from lmfit import Parameters, minimize, report_fit
 import yaml
 import sys
 import os
@@ -11,12 +10,12 @@ import json
 sys.path.append(os.getcwd())
 
 from misc.misc_utils import Trapezoid, FlattenMeans, ExtractParams
-from plotting_utils.utils import negLogLikeModel, model,  CombineSameGenWell
+from plotting_utils.utils import PlotSimul, PlotFit, PlotText
 from simulation_utils.utils import PrepareData
 #====================================================================
 ''' Files '''
-file_simul = "simulation_results/clump_comp/ClumpCompSimul_2022_11_02_TB_GFP_fib_s=50_vMax=10000.0_k=-3.0_sp_fix_r=1_n=3.csv"
-file_simul_size = "simulation_results/clump_comp/clump_information/ClumpCompSimul_2022_11_02_TB_GFP_fib_s=50_vMax=10000.0_k=-3.0_sp_fix_r=1_run=2_CLUMP.json"
+file_simul      = "simulation_results/clump_acc_dam/ClumpAccDamSimul_use_with_size_distribution_s=10_vMax=40000.0_b=-2.0_sp_fix_r=1_n=10.csv"
+file_simul_size = "simulation_results/clump_acc_dam/clump_information/ClumpAccDamSimul_use_with_size_distribution_s=10_vMax=40000.0_b=-2.0_sp_fix_r=1_CLUMP.json"
 
 file_data = "data/Experimental_data_Ed_Josh.xlsx"
 
@@ -24,13 +23,18 @@ SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast',
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
                '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib', 
-               '2022_10_27_TB_size_distribution']
+               'use_with_size_distribution', '2022_10_27_TB_size_distribution']
 
 assert "clump" or "Clump" in file_simul, "Simulation type must be 'clump', 'clump_comp', or 'clump_acc_dam'."
 #====================================================================
 ''' Key parameters '''
 flatten_means = True
 cutoff = 91.28
+
+yMin_1 = .35
+yMax_1 = .75
+yMin_2 = .65
+yMax_2 = .95
 #====================================================================
 with open('config.yml', 'r') as c:
     config = yaml.load(c, Loader=yaml.FullLoader)
@@ -50,7 +54,7 @@ print(UPPERS)
 MARKERS = config['PLOTTING']['markers_dict']#['o', '^', 's', 'D']
 COLORS = config['PLOTTING']['colors_dict']
 
-if ('GFP' in SHEET_NAMES[sheet]):
+if (('GFP' in SHEET_NAMES[sheet]) or (SHEET_NAMES[sheet] == 'use_with_size_distribution')):
     color  = COLORS['GFP']
     marker = MARKERS['GFP']
 elif (('cherry' in SHEET_NAMES[sheet]) or ('mCherry' in SHEET_NAMES[sheet]) or ('mC' in SHEET_NAMES[sheet])):
@@ -58,6 +62,8 @@ elif (('cherry' in SHEET_NAMES[sheet]) or ('mCherry' in SHEET_NAMES[sheet]) or (
     marker = MARKERS['cherry']
 
 LETTERS = ['A', 'B', 'C']
+replacement_val = config['PLOTTING']['replacement_val']
+band_type = config['PLOTTING']['band_type']
 #====================================================================
 ''' Get simulation data '''
 df_simul = pd.read_csv(file_simul)
@@ -104,7 +110,6 @@ fig.subplots_adjust(wspace=1, hspace=20)
 PARAM_DICT_SIMUL = ExtractParams(df_simul)
 
 simul_name      = PARAM_DICT_SIMUL['simul_name']
-num_simulations = int(PARAM_DICT_SIMUL['num_simulations'])
 scale = PARAM_DICT_SIMUL['scale']
 i_mean = PARAM_DICT_SIMUL['muG'] #0
 i_stdev = PARAM_DICT_SIMUL['sigmaG'] #1
@@ -114,98 +119,32 @@ gamma = PARAM_DICT_SIMUL['gamma']
 vMax = PARAM_DICT_SIMUL['vMax']
 scheme = PARAM_DICT_SIMUL['scheme']
 distribution = PARAM_DICT_SIMUL['distribution']
+
+num_simulations = 0
+for key in df_simul.keys():
+    if ("IU run" in key):
+        num_simulations += 1
 #--------------------------------------------------------------------
 PARAM_DICT_DATA = ExtractParams(df_data)
 cell_count = int(PARAM_DICT_DATA['cell_count'] / scale)
-#--------------------------------------------------------------------
-
 #====================================================================
-''' Prepare experimental and simulation data for plotting '''
-
-GEN_WELL_SIMUL  = np.asarray(df_simul.loc[:, 'GFP genomes (scaled)'])
-GEN_CELL_SIMUL  = GEN_WELL_SIMUL / cell_count
-INF_WELL_SIMULS = np.empty((num_simulations, df_simul.shape[0]), float)
-
-for i in range(num_simulations):
-    INF_WELL_SIMULS[i, :] = df_simul.loc[:, 'GFP IU run='+str(i)]
-
-print("||||||", np.shape(INF_WELL_SIMULS), np.shape(np.mean(INF_WELL_SIMULS, axis=0)), "|||||||")
-
-INF_WELL_SIMULS_MEAN = np.mean(INF_WELL_SIMULS, axis=0)
-INF_CELL_SIMULS_MEAN = INF_WELL_SIMULS.ravel() / cell_count
-
-INF_WELL_SIMULS_STDEVS = np.std(INF_WELL_SIMULS, axis=0)
-CIS = (1.96 * np.ones(np.shape(INF_WELL_SIMULS)[1])) * INF_WELL_SIMULS_STDEVS / (np.sqrt(np.shape(INF_WELL_SIMULS)[0]) * np.ones(np.shape(INF_WELL_SIMULS)[1]))
-
-MAXS = np.amax(INF_WELL_SIMULS, axis=0)
-MINS = np.amin(INF_WELL_SIMULS, axis=0)
-
-#--------------------------------------------------------------------
-GEN_WELL_SIMUL_U, INF_WELL_SIMULS_U = CombineSameGenWell(GEN_WELL_SIMUL, INF_WELL_SIMULS)
-
-INF_WELL_SIMULS_MEAN_U = np.mean(INF_WELL_SIMULS_U, axis=1)
-INF_CELL_SIMULS_MEAN_U = INF_WELL_SIMULS_MEAN_U.ravel() / cell_count
-
-INF_WELL_SIMULS_STDEVS_U = np.std(INF_WELL_SIMULS_U, axis=1)
-CIS_U = (1.96 * np.ones(np.shape(INF_WELL_SIMULS_U)[0])) * INF_WELL_SIMULS_STDEVS_U / (np.sqrt(np.shape(INF_WELL_SIMULS_U)[1]) * np.ones(np.shape(INF_WELL_SIMULS_U)[0]))
-
-MAXS_U = np.amax(INF_WELL_SIMULS_U, axis=1)
-MINS_U = np.amin(INF_WELL_SIMULS_U, axis=1)
-
-print(np.shape(GEN_WELL_SIMUL_U), np.shape(INF_WELL_SIMULS_U), np.shape(MAXS_U))
-#--------------------------------------------------------------------
+''' Plot experimental data '''
 GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros = PrepareData(df_data, scale)
-#====================================================================
-''' Fit model to experimental and simulated data '''
-params = Parameters()
-params.add('gamma', value=.45, min=0, max=1, vary = True)
-params.add('n', value = 1, min=0, max=3, vary = True)
-#====================================================================
-print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-result_data  = minimize(negLogLikeModel, params, method = 'differential_evolution', args=(GEN_CELL_DATA[LOWERS[sheet]:UPPERS[sheet]], INF_CELL_DATA[LOWERS[sheet]:UPPERS[sheet]]),)
-report_fit(result_data)
-print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-print("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=")
-result_simul = minimize(negLogLikeModel, params, method = 'differential_evolution', args=(GEN_CELL_SIMUL[LOWERS[sheet]:UPPERS[sheet]], INF_CELL_SIMULS_MEAN[LOWERS[sheet]:UPPERS[sheet]]),)
-report_fit(result_simul)
-print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-g_data  = result_data.params['gamma'].value
-n_data  = result_data.params['n'].value
-g_simul = result_simul.params['gamma'].value
-n_simul = result_simul.params['n'].value
-#g2 = result_simul_low.params['gamma'].value
-#n2 = result_simul_low.params['n'].value
 
-print("g_data = ", g_data, ", n_data = ", n_data, ", g_data = ", g_simul, ", n_simul = ", n_simul)#, ", g2 = ", g2, ", n2 = ", n2)
+ax0.scatter(GEN_CELL_DATA, INF_CELL_DATA, facecolors='none', edgecolors=color, marker=marker, alpha=1)
 
-x_data  = GEN_CELL_DATA
-y_data  = model(x_data, result_data.params)
-x_simul = GEN_CELL_SIMUL
-y_simul = model(x_simul, result_simul.params)
-#x2 = GFP_GEN_CELL
-#y2 = model(x2, result_simul_low.params)
-print("=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+")
-print("+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=")
-#====================================================================
-''' Plot simulation results, best fit curves, and i,r distributions '''
-ax0.scatter(GEN_CELL_DATA, INF_CELL_DATA, s = 80, facecolors = COLORS['GFP'], edgecolors = 'none', marker = MARKERS['GFP'], alpha=.3)
-ax0.plot(x_data[LOWERS[sheet]:UPPERS[sheet]], y_data[LOWERS[sheet]:UPPERS[sheet]], 'b-.', linewidth = 2)
+print("AHASDHALJDHAS:JDA:SLDKJA:SLKJDNA:LSKDA:", np.shape(GEN_CELL_DATA), np.shape(INF_CELL_DATA))
 
-#ax0.scatter(GEN_CELL_SIMUL, INF_CELL_SIMUL, s = 80, facecolors = 'none', edgecolors = COLORS['GFP'], marker = MARKERS['GFP'])
-#ax0.plot(x1[LOWERS[sheet]:UPPERS[sheet]], y1[LOWERS[sheet]:UPPERS[sheet]], 'y--', linewidth = 2)
-#ax0.plot(x2[LL[sheet]:UU[sheet]], y2[LL[sheet]:UU[sheet]], 'r--', linewidth = 2)
+g_data, n_data, p_data = PlotFit(ax0, GEN_CELL_DATA, INF_CELL_DATA, LOWERS[sheet], UPPERS[sheet], color='b', linestyle='-.',
+                                 yMin_1=yMin_1, yMax_1=yMax_1, yMin_2=yMin_2, yMax_2=yMax_2,
+                                 n_fits=100)
 
-if (num_simulations == 1):
-    ax0.scatter(GEN_CELL_SIMUL, INF_CELL_SIMULS_MEAN.ravel(), s=80, facecolors='none', edgecolors=color, marker=marker)
-elif (num_simulations > 1):
-    #plt.fill_between(GEN_CELL_SIMUL, (INF_WELL_SIMULS_MEAN-CIS) / cell_count, (INF_WELL_SIMULS_MEAN+CIS) / cell_count, color='black', alpha=.3)
-    
-    #plt.fill_between(GEN_CELL_SIMUL, MINS / cell_count, MAXS / cell_count, color='black', alpha=.3)
-    
-    ax0.fill_between(GEN_WELL_SIMUL_U / cell_count, MINS_U / cell_count, MAXS_U / cell_count, color='black', alpha=.3)
-    ax0.plot(GEN_WELL_SIMUL_U / cell_count, INF_CELL_SIMULS_MEAN_U, color='black', linestyle='-')
+#--------------------------------------------------------------------
+''' Plot simulation results '''
+GEN_WELL_SIMUL, GEN_CELL_SIMUL, INF_WELL_SIMUL, INF_CELL_SIMUL = PlotSimul(ax0, file_simul, band_type, replacement_val, return_gen_well=True)
 
-ax0.plot(x_simul[LOWERS[sheet]:UPPERS[sheet]], y_simul[LOWERS[sheet]:UPPERS[sheet]], 'r--', linewidth = 2)
+g_simul, n_simul, p_simul = PlotFit(ax0, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet],
+                                    yMin_1=yMin_1, yMax_1=yMax_1, yMin_2=yMin_2, yMax_2=yMax_2)
 #====================================================================
 ax1.scatter(diameter, mean_of_means, facecolors='None', marker='o', edgecolor='k', label='Mean of all samples')
 #====================================================================
@@ -239,13 +178,13 @@ yMin = 10**-6
 yMax = 1
 
 legendD = mlines.Line2D([], [], color='b', linestyle='-.', markerfacecolor=color, markeredgecolor='none', markerfacecoloralt='none', marker=marker,
-                          markersize=10, label = "HCMV-TB (GFP) (data): n = " + str(round(n_data, 3)))
+                          markersize=10, label = "HCMV-TB (GFP) (data): n = " + str(round(n_data, 3)) + ' (p='+str(round(p_data, 5)) + ')')
 legendS = ''
 if (num_simulations == 1):
     legendS = mlines.Line2D([], [], color='y', linestyle='--', markerfacecolor='none', markeredgecolor=color, markerfacecoloralt='none', marker=marker,
-                            markersize=10, label= "Simulation: n = " + str(round(n_simul, 3)))
+                            markersize=10, label= "Simulation: n = " + str(round(n_simul, 3)) + ' (p='+str(round(p_simul, 5)) + ')')
 elif (num_simulations > 1):
-    legendS = mlines.Line2D([], [], color='k', linestyle='-', label=r'Simul. mean, $\overline{n} = $' + str(round(n_simul, 3)) + " ("+str(num_simulations)+" runs)")
+    legendS = mlines.Line2D([], [], color='k', linestyle='-', label=r'Simul. mean, $\overline{n} = $' + str(round(n_simul, 3)) + ' (p='+str(round(p_simul, 5)) + ')' + " ("+str(num_simulations)+" runs)")
 
 ax0.legend(handles = [legendD, legendS], loc='upper left', prop={'size': 8})
 ax0.plot(np.linspace(xMin,xMax), np.linspace(yMin, yMax), 'k--', linewidth = 1)
@@ -256,20 +195,11 @@ ax0.set_yscale('log')
 ax0.set_xlim(xMin, xMax)
 ax0.set_ylim(yMin, yMax)
 
-if (simul_name == 'clump'):
-    ax0.set_title(SHEET_NAMES[sheet] + ' | Clumping')
-    ax0.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax))
-elif (simul_name == 'clump_comp'):
-    ax0.set_title(SHEET_NAMES[sheet] + ' | Clumping + Compensation')
-    ax0.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax) +", "+r'$\kappa=$'+str(PARAM_DICT_SIMUL['kappa']))
-elif (simul_name == 'clump_acc_dam'):
-    ax0.set_title(SHEET_NAMES[sheet] + ' | Clumping + Acc. Damage')
-    ax0.text(1.1 * xMin, .1 * yMax, "Scale: 1/" + str(scale) + ", " + r'$ \gamma = $' + str(gamma) + "\n vMax = " + str(vMax) + ", " + r'$\beta=$' + str(PARAM_DICT_SIMUL['beta']))
-
-ax0.text(1.1 * xMin, .05 * yMax, scheme)
-ax0.text(1.1 * xMin, .025 * yMax, distribution)
+PlotText(ax0, PARAM_DICT_SIMUL, xMin, xMax, yMin, yMax)
 
 ax0.text(.6 * xMin, 2.2 * yMax, 'A', fontsize=16, fontweight='bold', va='top', ha='right')
+
+ax0.set_title(SHEET_NAMES[sheet] + ' | '+PARAM_DICT_SIMUL['simul_name'])
 #--------------------------------------------------------------------
 ax1.legend(loc='upper left')
 ax1.set_ylim(0, 1.5 * max(mean_of_means))
@@ -316,5 +246,7 @@ elif (simul_name == 'clump_comp'):
     filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_k="+str(PARAM_DICT_SIMUL['kappa'])+"_"+scheme_short+"_"+dist_short # Specify filename
 elif (simul_name == 'clump_acc_dam'):
     filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+"_b="+str(PARAM_DICT_SIMUL['beta'])+"_"+scheme_short+"_"+dist_short # Specify filename
+elif (simul_name == 'var_clump_diam'):
+    filename = "VarClumpDiam_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+scheme_short+"_"+dist_short # Specify filename
 
-fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory

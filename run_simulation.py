@@ -10,7 +10,7 @@ from simulation_utils.one_strain_clump_simul import SimulateClump
 from simulation_utils.one_strain_accdam_simul import SimulateAccDam
 from simulation_utils.one_strain_comp_simul import SimulateComp
 from simulation_utils.one_strain_null_simul import SimulateNull
-from misc.misc_utils import ExtractParams
+from misc.misc_utils import ExtractParams, AverageDicts
 #====================================================================
 ''' Select simulation type & dataset '''
 
@@ -126,8 +126,22 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
                                                                                                                                    SHEET_NAMES[sheet],
                                                                                                                                    save_clump_info=True,
                                                                                                                                    CLUMP_DIST_PARAMS_DICT=CLUMP_SIZE_PARAMS_DICT)
-                with open(os.path.join(os.path.join(save_path, 'clump_information'), filename+'_run='+str(simulation)+'_CLUMP'+'.json'), "w") as f:
-                    json.dump(CLUMP_DICT, f)
+                # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ 
+                if (simulation == 0):
+                    with open(os.path.join(os.path.join(save_path, 'clump_information'), filename+'_CLUMP'+'.json'), "w") as f:
+                        json.dump(CLUMP_DICT, f)
+                
+                elif (simulation > 0):
+                    CLUMP_DICT_ORIG = {}
+                    with open(os.path.join(os.path.join(save_path, 'clump_information'), filename+'_CLUMP'+'.json'), "r") as f:
+                        CLUMP_DICT_ORIG = json.load(f)
+                    
+                    CLUMP_DICT_AVG = AverageDicts(CLUMP_DICT, CLUMP_DICT_ORIG, simulation)
+                    del(CLUMP_DICT)
+                    del(CLUMP_DICT_ORIG)
+                    with open(os.path.join(os.path.join(save_path, 'clump_information'), filename+'_CLUMP'+'.json'), "w") as f:
+                        json.dump(CLUMP_DICT_AVG, f)
+                # ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~
             else:
                 dict_['GFP IU run='+str(simulation)], dict_['total_interactions run='+str(simulation)] = SimulateClump(GEN_WELL_DATA, 
                                                                                                                        PARAM_DICT, 
@@ -142,9 +156,9 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             dict_['Parameters'] = PARAM_LIST_STR
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             SimulResults = pd.DataFrame.from_dict(dict_)
-            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'_xtra.csv'), index=False)
+            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'_XTRA.csv'), index=False)
             print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-            print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'))
+            print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'_XTRA.csv'))
     #----------------------------------------------------------------
     elif (simul_name == 'comp'):
         if (save_path==None):
