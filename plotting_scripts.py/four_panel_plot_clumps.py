@@ -44,12 +44,12 @@ SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast',
                'use_with_size_distribution', '2022_10_27_TB_size_distribution']
 
 data_file               = "data/Experimental_data_Ed_Josh.xlsx"
-clump_file              = "simulation_results/clump/ClumpSimul_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
-clump_info_file         = "simulation_results/clump/clump_information/ClumpSimul_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_CLUMP.json"
-clump_comp_file         = "simulation_results/clump_comp/ClumpCompSimul_use_with_size_distribution_s=10_vMax=10000.0_k=0.0_sp_fix_r=1_n=10.csv"
-clump_comp_info_file    = "simulation_results/clump_comp/clump_information/ClumpCompSimul_use_with_size_distribution_s=10_vMax=10000.0_k=0.0_sp_fix_r=1_run=6_CLUMP.json"
-clump_acc_dam_file      = "simulation_results/clump_acc_dam/ClumpAccDamSimul_use_with_size_distribution_s=10_vMax=10000.0_b=-2.0_sp_fix_r=1_n=10.csv"
-clump_acc_dam_info_file = "simulation_results/clump_acc_dam/clump_information/ClumpAccDamSimul_use_with_size_distribution_s=10_vMax=10000.0_b=-2.0_sp_fix_r=1_CLUMP.json"
+clump_file              = "simulation_results/clump/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
+clump_info_file         = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_CLUMP.json"
+clump_comp_file         = "simulation_results/clump_comp/ClumpCompSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_k=0.0_sp_fix_r=1_n=10.csv"
+clump_comp_info_file    = "simulation_results/clump_comp/clump_information/ClumpCompSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_k=0.0_sp_fix_r=1_CLUMP.json"
+clump_acc_dam_file      = "simulation_results/clump_acc_dam/ClumpAccDamSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_b=-2.0_sp_fix_r=1_n=10.csv"
+clump_acc_dam_info_file = "simulation_results/clump_acc_dam/clump_information/ClumpAccDamSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_b=-2.0_sp_fix_r=1_CLUMP.json"
 #====================================================================
 with open('config.yml', 'r') as c:
     config = yaml.load(c, Loader=yaml.FullLoader)
@@ -284,5 +284,5 @@ ax_clump_comp_inset.set_yscale('log')
 #====================================================================
 plt.show()
 #====================================================================
-fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), 'four_panel_clump_same_params.pdf'), bbox_inches='tight', pad_inches=0)
+#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), 'VVG_four_panel_clump_same_params.pdf'), bbox_inches='tight', pad_inches=0)
 #====================================================================

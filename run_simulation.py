@@ -6,7 +6,8 @@ import json
 
 sys.path.append(os.getcwd())
 from simulation_utils.utils import PrepareData, PrepareParameters, PrepareParamList
-from simulation_utils.one_strain_clump_simul import SimulateClump
+#from simulation_utils.one_strain_clump_simul import SimulateClump
+from simulation_utils.one_strain_clump_simul_VVG import SimulateClump
 from simulation_utils.one_strain_accdam_simul import SimulateAccDam
 from simulation_utils.one_strain_comp_simul import SimulateComp
 from simulation_utils.one_strain_null_simul import SimulateNull
@@ -33,7 +34,9 @@ dose_inf_df = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name=SH
 #====================================================================
 ''' Simulate infections '''
 def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_path=None, scale=None, save_clump_info=False):
-    assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', 'null'], simul_name+" must be 'clump', 'comp', 'acc_dam', 'clump_acc_dam', 'clump_comp', 'var_clump_diam', or 'null'."
+    assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', 'null'], " >> Check config.yml\n >> 'simul_name' must be 'clump', 'comp', 'acc_dam', 'clump_acc_dam', 'clump_comp', 'var_clump_diam', or 'null'. Got: " + simul_name
+    assert sheet in range(9), " >> Check config.yml\n >> 'sheet' must be an integer between 0 and 8. Got: "+ str(sheet)
+    assert config['SIMULATION_PARAMETERS']['remove'] in range(2), " >> Check config.yml\n >> 'remove' must be either 0 (False) or 1 (True). Got: "+ str(config['SIMULATION_PARAMETERS']['remove'])
     #----------------------------------------------------------------
     ''' Get parameters for the simulation '''
     PARAM_DICT = PrepareParameters(config, simul_name, sheet, scale)
@@ -80,11 +83,11 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         filename = ''
         if (simul_name == 'clump'):
-            filename = "ClumpSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
+            filename = "ClumpSimulVVG_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         elif (simul_name == 'clump_comp'):
-            filename = "ClumpCompSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_k="+str(PARAM_DICT['kappa'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
+            filename = "ClumpCompSimulVVG_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_k="+str(PARAM_DICT['kappa'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
         elif (simul_name == 'clump_acc_dam'):
-            filename = "ClumpAccDamSimul_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
+            filename = "ClumpAccDamSimulVVG_"+SHEET_NAMES[sheet]+"_s="+str(PARAM_DICT['scale'])+"_vMax="+str(PARAM_DICT['vMax'])+"_b="+str(PARAM_DICT['beta'])+"_"+scheme_short+"_"+dist_short+"_r="+str(PARAM_DICT['remove']) # Specify filename
 
         elif (simul_name == 'var_clump_diam'):
             func_short = ''
@@ -156,9 +159,9 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             dict_['Parameters'] = PARAM_LIST_STR
             #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             SimulResults = pd.DataFrame.from_dict(dict_)
-            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'_XTRA.csv'), index=False)
+            SimulResults.to_csv(os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'), index=False)
             print(" - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-            print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'_XTRA.csv'))
+            print(" >> Saved at:", os.path.join(save_path, filename+'_n='+str(num_simulations)+'.csv'))
     #----------------------------------------------------------------
     elif (simul_name == 'comp'):
         if (save_path==None):

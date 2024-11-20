@@ -38,7 +38,7 @@ def SimulateNull(GEN_WELL_DATA, PARAM_DICT, cell_count):
                 
                 if (num_interactions > 0):
                     #----------------------------------------------------
-                    ''' Calculate the maximum infectivity of the virions coming to the cell '''
+                    ''' Identify the virions that will attack the cell '''
 
                     if (num_interactions < len(GFP_POOL)):
                         idx_created = 0
@@ -54,7 +54,7 @@ def SimulateNull(GEN_WELL_DATA, PARAM_DICT, cell_count):
                     for idx in VIRION_ATTACKERS_IDX:
                         VIRION_ATTACKERS.append(GFP_POOL[idx])
                     #----------------------------------------------------                                  
-                    ''' Now have virions try to infect the cell with the buffed infectivity '''
+                    ''' Now have virions attack the cell '''
                     is_successful = False
                     for b in range(num_interactions):
                         is_successful = Innoculation(VIRION_ATTACKERS[b], CELL_POOL[k], gamma=PARAM_DICT['gamma'])

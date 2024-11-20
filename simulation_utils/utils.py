@@ -1,3 +1,5 @@
+import sys
+sys.dont_write_bytecode = True
 import numpy as np
 from scipy.stats import skewnorm
 import yaml
@@ -230,7 +232,7 @@ def CalcNumClumps(total_virions, max_virions_in_clump, diameter_nz,
 
             err = min([abs(virions_in_clump - virions_in_clump_low), abs(virions_in_clump - virions_in_clump_hi)])
 
-        #print("broken=", broken, ", clump_diam=", diameter, ", vir=", virions_in_clump)
+        #print(" >> broken=", broken, ", clump_diam=", diameter, ", vir=", virions_in_clump)
         virions_in_clump = int(round(virions_in_clump))
         num_clumps_of_size_i[virions_in_clump-1] += 1
 
