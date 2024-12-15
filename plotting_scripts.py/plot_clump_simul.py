@@ -14,8 +14,11 @@ from plotting_utils.utils import PlotSimul, PlotFit, PlotText
 from simulation_utils.utils import PrepareData
 #====================================================================
 ''' Files '''
-file_simul      = "simulation_results/clump_acc_dam/ClumpAccDamSimul_use_with_size_distribution_s=10_vMax=40000.0_b=-2.0_sp_fix_r=1_n=10.csv"
-file_simul_size = "simulation_results/clump_acc_dam/clump_information/ClumpAccDamSimul_use_with_size_distribution_s=10_vMax=40000.0_b=-2.0_sp_fix_r=1_CLUMP.json"
+# file_simul      = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
+# file_simul_size = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_sp_fix_r=1_CLUMP.json"
+
+file_simul      = "simulation_results/clump/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
+file_simul_size = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_CLUMP.json"
 
 file_data = "data/Experimental_data_Ed_Josh.xlsx"
 
@@ -23,7 +26,8 @@ SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast',
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
                '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib', 
-               'use_with_size_distribution', '2022_10_27_TB_size_distribution']
+               'use_with_size_distribution', 'use_with_size_dist_interp', 
+               '2022_10_27_TB_size_distribution', '2022_10_27_TB_size_dist_interp']
 
 assert "clump" or "Clump" in file_simul, "Simulation type must be 'clump', 'clump_comp', or 'clump_acc_dam'."
 #====================================================================
@@ -52,7 +56,7 @@ print(LOWERS)
 print(UPPERS)
 
 MARKERS = config['PLOTTING']['markers_dict']#['o', '^', 's', 'D']
-COLORS = config['PLOTTING']['colors_dict']
+COLORS  = config['PLOTTING']['colors_dict']
 
 if (('GFP' in SHEET_NAMES[sheet]) or (SHEET_NAMES[sheet] == 'use_with_size_distribution')):
     color  = COLORS['GFP']
@@ -60,6 +64,9 @@ if (('GFP' in SHEET_NAMES[sheet]) or (SHEET_NAMES[sheet] == 'use_with_size_distr
 elif (('cherry' in SHEET_NAMES[sheet]) or ('mCherry' in SHEET_NAMES[sheet]) or ('mC' in SHEET_NAMES[sheet])):
     color = COLORS['cherry']
     marker = MARKERS['cherry']
+else:
+    color = 'green'
+    marker = 's'
 
 LETTERS = ['A', 'B', 'C']
 replacement_val = config['PLOTTING']['replacement_val']
@@ -249,4 +256,4 @@ elif (simul_name == 'clump_acc_dam'):
 elif (simul_name == 'var_clump_diam'):
     filename = "VarClumpDiam_"+SHEET_NAMES[sheet]+"_s="+str(scale)+"_vMax="+str(vMax)+scheme_short+"_"+dist_short # Specify filename
 
-#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory

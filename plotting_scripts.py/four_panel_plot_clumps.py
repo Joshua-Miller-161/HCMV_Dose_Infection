@@ -37,19 +37,21 @@ xMax_clump = 70
 yMax_clump = 10000000
 #====================================================================
 ''' Files '''
+
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
-               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib',
-               'use_with_size_distribution', '2022_10_27_TB_size_distribution']
+               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib', 
+               'use_with_size_distribution', 'use_with_size_dist_interp', 
+               '2022_10_27_TB_size_distribution', '2022_10_27_TB_size_dist_interp']
 
 data_file               = "data/Experimental_data_Ed_Josh.xlsx"
-clump_file              = "simulation_results/clump/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
-clump_info_file         = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_CLUMP.json"
-clump_comp_file         = "simulation_results/clump_comp/ClumpCompSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_k=0.0_sp_fix_r=1_n=10.csv"
-clump_comp_info_file    = "simulation_results/clump_comp/clump_information/ClumpCompSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_k=0.0_sp_fix_r=1_CLUMP.json"
-clump_acc_dam_file      = "simulation_results/clump_acc_dam/ClumpAccDamSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_b=-2.0_sp_fix_r=1_n=10.csv"
-clump_acc_dam_info_file = "simulation_results/clump_acc_dam/clump_information/ClumpAccDamSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_b=-2.0_sp_fix_r=1_CLUMP.json"
+clump_file              = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
+clump_info_file         = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_sp_fix_r=1_CLUMP.json"
+clump_comp_file         = "simulation_results/clump_comp/ClumpCompSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_k=0.0_sp_fix_r=1_n=10.csv"
+clump_comp_info_file    = "simulation_results/clump_comp/clump_information/ClumpCompSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_k=0.0_sp_fix_r=1_CLUMP.json"
+clump_acc_dam_file      = "simulation_results/clump_acc_dam/ClumpAccDamSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_b=-2.0_sp_fix_r=1_n=10.csv"
+clump_acc_dam_info_file = "simulation_results/clump_acc_dam/clump_information/ClumpAccDamSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_b=-2.0_sp_fix_r=1_CLUMP.json"
 #====================================================================
 with open('config.yml', 'r') as c:
     config = yaml.load(c, Loader=yaml.FullLoader)
@@ -88,7 +90,7 @@ marker_color = 'gray'
 #====================================================================
 #====================================================================
 ''' Plot experimental data '''
-df_data = pd.read_excel(data_file, sheet_name='use_with_size_distribution')
+df_data = pd.read_excel(data_file, sheet_name='use_with_size_dist_interp')
 
 PARAM_DICT_DATA = ExtractParams(df_data)
 cell_count = int(PARAM_DICT_DATA['cell_count'])

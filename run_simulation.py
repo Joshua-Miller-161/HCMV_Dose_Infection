@@ -1,7 +1,8 @@
+import sys
+sys.dont_write_bytecode = True
 import pandas as pd
 import yaml
 import os
-import sys
 import json
 
 sys.path.append(os.getcwd())
@@ -27,7 +28,9 @@ SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast',
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
                '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib', 
-               'use_with_size_distribution', '2022_10_27_TB_size_distribution']
+               'use_with_size_distribution', 'use_with_size_dist_interp', 
+               '2022_10_27_TB_size_distribution', '2022_10_27_TB_size_dist_interp']
+
 dose_inf_df = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name=SHEET_NAMES[sheet])
 
 #print(dose_inf_df)
@@ -35,7 +38,7 @@ dose_inf_df = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name=SH
 ''' Simulate infections '''
 def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_path=None, scale=None, save_clump_info=False):
     assert simul_name in ['clump', 'comp', 'acc_dam', 'clump_comp', 'clump_acc_dam', 'var_clump_diam', 'null'], " >> Check config.yml\n >> 'simul_name' must be 'clump', 'comp', 'acc_dam', 'clump_acc_dam', 'clump_comp', 'var_clump_diam', or 'null'. Got: " + simul_name
-    assert sheet in range(9), " >> Check config.yml\n >> 'sheet' must be an integer between 0 and 8. Got: "+ str(sheet)
+    assert sheet in range(10), " >> Check config.yml\n >> 'sheet' must be an integer between 0 and 9. Got: "+ str(sheet)
     assert config['SIMULATION_PARAMETERS']['remove'] in range(2), " >> Check config.yml\n >> 'remove' must be either 0 (False) or 1 (True). Got: "+ str(config['SIMULATION_PARAMETERS']['remove'])
     #----------------------------------------------------------------
     ''' Get parameters for the simulation '''
@@ -45,6 +48,14 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
     #----------------------------------------------------------------
     ''' Prepare the experimental data '''
     GEN_WELL_DATA, GEN_CELL_DATA, INF_CELL_DATA, num_zeros = PrepareData(dose_inf_df, PARAM_DICT['scale'])
+    
+    
+    print(" ?     ?      ?     ? GEN_WELL_DATA ?      ?       ?     ?")
+    print("")
+    print(GEN_WELL_DATA)
+    print("")
+    print(" ?     ?      ?     ? GEN_WELL_DATA ?      ?       ?     ?")
+
     #----------------------------------------------------------------
     ''' Get cell count'''
     DATA_DICT = ExtractParams(dose_inf_df)
@@ -105,7 +116,7 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         ''' Get clump_size_params_dict if necessary '''
         CLUMP_SIZE_PARAMS_DICT = None # Put in scope
-        if ((sheet == 8) and not (simul_name == 'var_clump_diam')):
+        if (((sheet == 8) or (sheet == 9)) and not (simul_name == 'var_clump_diam')):
             CLUMP_SIZE_PARAMS_DICT = config['CLUMP_PARAMETERS']['clump_dist_params_dict']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         for simulation in range(num_simulations):
@@ -118,7 +129,11 @@ def RunMultiple(num_simulations, simul_name, config, dose_inf_df, sheet, save_pa
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
             print("<>><<>><<>><<>><<>><<>><<>>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>><<>")
-            clump_size_df = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name='2022_10_27_TB_size_distribution')
+            clump_size_df = 69
+            if (SHEET_NAMES[sheet] == 'use_with_size_distribution'):
+                clump_size_df = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name='2022_10_27_TB_size_distribution')
+            elif (SHEET_NAMES[sheet] == 'use_with_size_dist_interp'):
+                clump_size_df = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name='2022_10_27_TB_size_dist_interp')
             #print(clump_size_df)
             if save_clump_info:
                 dict_['GFP IU run='+str(simulation)], dict_['total_interactions run='+str(simulation)], CLUMP_DICT = SimulateClump(GEN_WELL_DATA, 

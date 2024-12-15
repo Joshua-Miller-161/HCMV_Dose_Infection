@@ -90,7 +90,7 @@ def PrepareData(dose_inf_df, scale=None):
             if (scale==None):
                 GEN_WELL_DATA[j] = int(dose_inf_df.loc[dose_inf_df.shape[0] - i - 1, 'Genomes/well'])
             else:
-                GEN_WELL_DATA[j] = int(dose_inf_df.loc[dose_inf_df.shape[0] - i - 1, 'Genomes/well'] / scale)
+                GEN_WELL_DATA[j] = int(dose_inf_df.loc[dose_inf_df.shape[0] - i - 1, 'Genomes/well'] / scale + 0.09)
 
             GEN_CELL_DATA[j] = dose_inf_df.loc[dose_inf_df.shape[0] - i - 1, 'Genomes/cell']
             INF_CELL_DATA[j] = dose_inf_df.loc[dose_inf_df.shape[0] - i - 1, 'IU/cell']
@@ -266,37 +266,6 @@ def CalcNumClumps(total_virions, max_virions_in_clump, diameter_nz,
             break
     num_clumps_of_size_i = num_clumps_of_size_i[:valid_end+1]
     #print("final:", num_clumps_of_size_i, ", len:", num_clumps_of_size_i.shape[0], ',', total, ',', total_virions)
-
-
-
-
-
-
-
-
-    # ''' WORKS FOR LIN AND POLY Clean up and correct any errors '''
-    # for valid_end in range(num_clumps_of_size_i.shape[0]-1, 0, -1):
-    #     if (num_clumps_of_size_i[valid_end] > 0):
-    #         break
-    # num_clumps_of_size_i = num_clumps_of_size_i[:valid_end+1]
-    # print("num_clumps_of_size_i=", num_clumps_of_size_i)
-
-    # total = 0
-    # for i in range(num_clumps_of_size_i.shape[0]):
-    #     total += (i+1) * num_clumps_of_size_i[i]
-
-    # #print("pre  :", num_clumps_of_size_i, ", len:", num_clumps_of_size_i.shape[0], ',', total, ',', total_virions)
-    # num_clumps_of_size_i[0] += (total_virions-total)
-    # #print("post :", num_clumps_of_size_i, ", len:", num_clumps_of_size_i.shape[0], ',', total, ',', total_virions)
-
-    # if (num_clumps_of_size_i[0] < 0):
-    #     num_clumps_of_size_i[0] += (num_clumps_of_size_i.shape[0]+1) * num_clumps_of_size_i[-1]
-    #     num_clumps_of_size_i[-1] -= 1
-    # for valid_end in range(num_clumps_of_size_i.shape[0]-1, 0, -1):
-    #     if (num_clumps_of_size_i[valid_end] > 0):
-    #         break
-    # num_clumps_of_size_i = num_clumps_of_size_i[:valid_end+1]
-    # #print("final:", num_clumps_of_size_i, ", len:", num_clumps_of_size_i.shape[0], ',', total, ',', total_virions)
 
     return num_clumps_of_size_i
 #====================================================================

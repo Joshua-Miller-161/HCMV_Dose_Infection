@@ -20,22 +20,32 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
         CLUMP_DICT = {str(x): [] for x in GEN_WELL_DATA}
     #----------------------------------------------------------------
     ''' Import data '''
-    diameters = clump_size_df.pop('d.nm').values
+    diameter = clump_size_df.pop('d.nm')
+    diameter = np.asarray(diameter)
     #----------------------------------------------------------------
-    ''' Filter to include only non-zero portions '''
+    ''' Average '''
+    cutoff = 91.28
 
     means_clump_size_df = clump_size_df.filter(like='Mean')
+    stds_clump_size_df  = clump_size_df.filter(like='SD')
 
-    max_of_means = means_clump_size_df.max(axis=1)
+    mean_of_means = means_clump_size_df.mean(axis=1)
+    mean_of_means = np.asarray(mean_of_means)
 
+    mean_of_means = FlattenMeans(diameter, mean_of_means, cutoff)
+
+    mean_of_means /= Trapezoid(diameter, mean_of_means) # Normalize by dividing by area  
+    #----------------------------------------------------------------
+    ''' Filter to include only non-zero portions '''
     diameter_nz = []
+    mean_of_means_nz = []
 
-    for i in range(max_of_means.shape[0]):
-        if (max_of_means[i] > 0):
-            diameter_nz.append(diameters[i])
+    for i in range(mean_of_means.shape[0]):
+        if (mean_of_means[i] > 0):
+            diameter_nz.append(diameter[i])
+            mean_of_means_nz.append(mean_of_means[i])
     #----------------------------------------------------------------
     ''' Calculate the maximum number of virions which could be in a clump '''
-    
     max_virions_in_clump = -999
     if (PARAM_DICT['scheme'] == 'linear'):
         max_virions_in_clump = round(max(diameter_nz) / PARAM_DICT['lb'])
@@ -83,7 +93,7 @@ def SimulateClump(GEN_WELL_DATA, PARAM_DICT, cell_count, clump_size_df, simul_na
         # CLUMP_SIZES: 1,2,3,...,max clump size
         # radius: max clump size
         CLUMP_NUMS = -99999999
-        if ((sheet_name in ['use_with_size_distribution', 'use_with_size_dist_interp']) and not (simul_name == 'var_clump_diam')):
+        if ((sheet_name == 'use_with_size_distribution') and not (simul_name == 'var_clump_diam')):
             keys_   = list(CLUMP_DIST_PARAMS_DICT.keys())
             keys__  = [int(float(key) / PARAM_DICT['scale']) for key in keys_]
             key_idx = keys__.index(GEN_WELL_DATA[init])

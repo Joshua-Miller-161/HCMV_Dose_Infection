@@ -1,8 +1,9 @@
+import sys
+sys.dont_write_bytecode = True
 import numpy as np
 import pandas as pd
 from itertools import chain
 from scipy.stats import chisquare
-import sys
 import os
 from lmfit import Parameters, minimize, report_fit
 import matplotlib.pyplot as plt
