@@ -46,6 +46,11 @@ To modify the simulation parameters themselves, such as vMax, gamma, kappa, beta
 - If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment.
 - Type *python run_simulation.py* and press enter.
 
+## What is clump sandbox?
+- The clump_sandbox folder is for the user to test out theoretical clump size distributions based on either Poisson, geometric, or 1-inflated geometric distribution. All parameters can be controlled in the sandbox_config.yml file. To run do:
+    conda activate hcmv_env
+    python3 clump_sandbox/run_simulation.py
+
 # Plotting a simulation
 There are two scripts for plotting simulation results, *make_simple_simul_plot* and *plot_clump_simul*. Both make a plot comparing the simulation results against an experimental dataset. But *plot_clump_simul* shows extra information about the clump distribution.
 
@@ -73,3 +78,4 @@ There are two scripts for plotting simulation results, *make_simple_simul_plot* 
 - Ensure that you have changed config.yml to what you want.
 - If you installed using the Anaconda (conda) method, ensure that you have activated the conda environment.
 - Type either *python make_simple_simul_plot.py* or *python plot_clump_simul.py* depending on what you want.
+

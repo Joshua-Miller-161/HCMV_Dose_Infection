@@ -15,7 +15,15 @@ from plotting_utils.utils import negLogLikeModel, model, CombineSameGenWell, Mak
 #====================================================================
 ''' Get simulation data '''
 
-file = 'simulation_results/var_clump_diam/VarClumpDiamSimul_2021_07_13 GFP_TB_fibroblast_s=100_vMax=1000.0_f=l_sp_fix_r=1_n=3.csv'
+#file = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_sp_norm_r=1_n=10.csv"
+#file = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_poly_norm_r=1_n=10.csv"
+#file = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_lin_norm_r=1_n=10.csv"
+
+#file = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
+#file = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_poly_fix_r=1_n=10.csv"
+#file = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_lin_fix_r=1_n=10.csv"
+
+file = "/Users/joshuamiller/Python Files/HCMV_Dose_Infection/simulation_results/clump/ClumpSimulVVG_s=1.0_vMax=1000.0_vMax_c=1000.0_r=True_n=3.csv"
 df_simul = pd.read_csv(file)
 #--------------------------------------------------------------------
 PARAM_DICT_SIMUL = ExtractParams(df_simul)
@@ -30,6 +38,11 @@ r_mean          = PARAM_DICT_SIMUL['muR']
 r_stdev         = PARAM_DICT_SIMUL['sigmaR']
 gamma           = PARAM_DICT_SIMUL['gamma']
 vMax            = PARAM_DICT_SIMUL['vMax']
+
+try:
+    sheet = int(PARAM_DICT_SIMUL['sheet'])
+except KeyError:
+    sheet = ''
 
 assert simul_name in ['clump', 'comp', 'acc_dam', 'null', 'clump_comp', 'clump_acc_dam', 'var_clump_diam'], "Got: "+simul_name+". 'simul_name' must be one of 'clump', 'comp', 'acc_dam', 'null', 'clump_comp', 'clump_acc_dam', 'var_clump_diam'."
 
@@ -48,10 +61,11 @@ elif (simul_name == 'null'):
 SHEET_NAMES = ['2021_10_05 TB_GFP_epithelial', '2020_07_02 ME_GFP_fibroblast', 
                '2020_05_29 TR_GFP_fibroblast', '2021_07_13 GFP_TB_fibroblast', 
                '2020_08_12 TB_GFP_fibroblast', '2020_09_14 TR_GFP_epithelial',
-               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib']
-df_data = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name=SHEET_NAMES[sheet])
+               '2021_08_13 ME_mC_epithelial', '2022_11_02_TB_GFP_fib', 
+               'use_with_size_distribution', 'use_with_size_dist_interp', 
+               '2022_10_27_TB_size_distribution', '2022_10_27_TB_size_dist_interp']
 
-print(SHEET_NAMES[6])
+df_data = pd.read_excel('data/Experimental_data_Ed_Josh.xlsx', sheet_name=SHEET_NAMES[sheet])
 #--------------------------------------------------------------------
 PARAM_DICT_DATA = ExtractParams(df_data)
 cell_count = int(PARAM_DICT_DATA['cell_count'] / scale)
@@ -72,7 +86,7 @@ print(UPPERS)
 MARKERS = config['PLOTTING']['markers_dict']#['o', '^', 's', 'D']
 COLORS = config['PLOTTING']['colors_dict']
 
-if ('GFP' in SHEET_NAMES[sheet]):
+if (('GFP' in SHEET_NAMES[sheet]) or ('use' in SHEET_NAMES[sheet])):
     color  = COLORS['GFP']
     marker = MARKERS['GFP']
 elif (('cherry' in SHEET_NAMES[sheet]) or ('mCherry' in SHEET_NAMES[sheet]) or ('mC' in SHEET_NAMES[sheet])):
@@ -91,12 +105,12 @@ ax.scatter(GEN_CELL_DATA, INF_CELL_DATA, facecolors='none', edgecolors=color, ma
 
 print("AHASDHALJDHAS:JDA:SLDKJA:SLKJDNA:LSKDA:", np.shape(GEN_CELL_DATA), np.shape(INF_CELL_DATA))
 
-g_data, n_data = PlotFit(ax, GEN_CELL_DATA, INF_CELL_DATA, LOWERS[sheet], UPPERS[sheet], color='b', linestyle='-.')
+g_data, n_data, p_data = PlotFit(ax, GEN_CELL_DATA, INF_CELL_DATA, LOWERS[sheet], UPPERS[sheet], color='b', linestyle='-.')
 #====================================================================
 ''' Plot simulation results '''
 GEN_CELL_SIMUL, INF_CELL_SIMUL = PlotSimul(ax, file, band_type, replacement_val)
 
-g_simul, n_simul = PlotFit(ax, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet])
+g_simul, n_simul, p_simul = PlotFit(ax, GEN_CELL_SIMUL, INF_CELL_SIMUL, LOWERS[sheet], UPPERS[sheet])
 
 #====================================================================
 ''' Formatting '''
@@ -136,12 +150,16 @@ elif (simul_name == 'comp'):
 elif (simul_name == 'null'):
     ax.set_title(SHEET_NAMES[sheet] + ' | Null')
 
+print("____________________________________________________________")
+print(" >> cells", cell_count)
+print("____________________________________________________________")
 
 ax.text(.6 * xMin, 2.2 * yMax, '', fontsize=16, fontweight='bold', va='top', ha='right')
 #====================================================================
 ''' Save figure '''
 filename = MakeFilename(PARAM_DICT_SIMUL, SHEET_NAMES[sheet])
-#fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+fig.savefig(os.path.join(os.path.join(os.getcwd(), 'figs'), filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+
 #====================================================================
 #====================================================================
 #====================================================================
@@ -159,7 +177,7 @@ INTER_WELL = np.mean(INTER_U, axis=1)  / GEN_WELL_SIMUL_U
 ax2.plot(GEN_WELL_SIMUL_U / cell_count, INTER_CELL,label='interactions / cell_count')
 ax2.plot(GEN_WELL_SIMUL_U / cell_count, INTER_WELL, label='interactions / GENOMES/WELL')
 #--------------------------------------------------------------------
-xMin = 10**-3
+xMin = 10**-4
 xMax = 10**3
 yMin = 10**(int(np.log10(min([min(INTER_CELL), min(INTER_WELL)])))-1)
 yMax = 10**(int(np.log10(max([max(INTER_CELL), max(INTER_WELL)]))) + 1)
@@ -190,5 +208,5 @@ elif (simul_name == 'null'):
 #====================================================================
 ''' Save figure '''
 filename = MakeFilename(PARAM_DICT_SIMUL, SHEET_NAMES[sheet])
-#fig2.savefig(os.path.join(os.path.join(os.getcwd(), 'figs/interaction_figs'), "INTER_"+filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
+fig2.savefig(os.path.join(os.path.join(os.getcwd(), 'figs/interaction_figs'), "INTER_"+filename+".pdf"), bbox_inches = 'tight', pad_inches = 0) # Save figure in the new directory
 plt.show()

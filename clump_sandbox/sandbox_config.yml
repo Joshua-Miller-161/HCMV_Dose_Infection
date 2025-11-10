@@ -1,0 +1,50 @@
+SIMULATION_PARAMETERS:
+  simul_name: 'clump' # Type 'clump' for clump simulation,  
+                      # 'clump_comp' for a simulation which combines clumping and compensation
+                      # 'clump_acc_dam' for a simulation which combines clumping and accrued damage
+  num_simulations: 10 # How many repeats of a given simulation to run.
+  scale: 1 # Keep between 1 and 1000, bigger number=faster simulation
+  gamma: .45 # ??
+  remove: 1 # 1: take out virions which infect a cell, 0: don't.
+  cell_count: 1000
+  num_fits: 10 # How many times to try fitting clump frequencies to distribution
+
+CLUMP_PARAMETERS:
+  vMax: 1000 # Controls how many virions visit a cell. Keep between 10000 and 1000000. Bigger=less clumps
+  vMax_c: 100 # smaller for poisson = bigger clumps, smaller for geometric = larger clumps
+  distribution: 'poisson' # Distribution of clump sizes. Use 'geometric', '1inf-geo' or 'poisson'
+  fixed_mean: False # Whether or not to all mean of clump_distribution_function to change with genomes/well
+  mean: 1.5
+  f_1: .7
+  custom_values: # If you so choose, put values between 0 and 1 here to manually specify the ratios of clump size frequencies. Can add more if you want
+    - .5 # Clump size of 1
+    - .1 # Clump size of 2
+    - .1 # ... 3
+    - .1 # ... 4
+    - .1 # ... 5
+
+CELL_PARAMETERS:
+  mu_res: 12 # Mean cell resistivity
+  std_res: 1 # Standard deviation of resisitivty
+
+GFP_VIRUS_PARAMETERS:
+  mu_inf: 0  # Mean virion infectivty
+  std_inf: 1 # Standard deviation of infectivty
+
+PLOTTING:
+  replacement_val: 0.0000011 # What to replace 0 with, since using log scale to plot
+
+  markers_dict: # What shape to use for scatter plot. Change to your heart's content
+    'GFP': 's'         # Square
+    'cherry': '^'      # Triangle
+    'coinfection': 'o' # Circle
+
+  colors_dict: # What color to use for scatter plot. Change to your heart's content
+    'GFP': 'green'
+    'cherry': 'red'
+    'coinfection': 'black'
+
+  band_type: 'minmax' # Bands for plot; either 'minmax' or 'CIs'
+
+  LOWERS: 0 # Selects lower bound of data to use when calculating n (Powerlaw). Recommended that you do not change
+  UPPERS: 9 # Selects upper bound of data to use when calculating n (Powerlaw). Recommended that you do not change 

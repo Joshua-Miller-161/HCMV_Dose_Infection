@@ -144,7 +144,7 @@ def MakeFilename(PARAM_DICT_SIMUL, sheet_name):
 #====================================================================
 def PlotText(ax, PARAM_DICT_SIMUL, xMin, xMax, yMin, yMax):
     remove_str = ''
-    if (PARAM_DICT_SIMUL['remove'] == 1):
+    if (PARAM_DICT_SIMUL['remove'] == 1 or PARAM_DICT_SIMUL['remove'] == 1.0 or PARAM_DICT_SIMUL['remove'] == True or PARAM_DICT_SIMUL['remove'] == 'True'):
         remove_str = 'Successful virions\nremoved'
     elif (PARAM_DICT_SIMUL['remove'] == 0):
         remove_str = 'Successful virions\nleft in'
@@ -250,7 +250,7 @@ def PlotFit(ax, x_data, y_data, lower_idx=0, upper_idx=-1,
             plot_vlines=False, yMin_1=0, yMax_1=1, yMin_2=0, yMax_2=1, 
             plot_fit_markers=False, s=5, marker_color='green', marker='^',
             g_min=0, g_max=1, n_min=0, n_max=3,
-            color='red', linestyle='-', n_fits=1):
+            color='red', linestyle='-', n_fits=1, linewidth=1):
     
     G_VALS   = np.ones(n_fits, float)
     N_NALS   = np.ones(n_fits, float)
@@ -289,7 +289,7 @@ def PlotFit(ax, x_data, y_data, lower_idx=0, upper_idx=-1,
     print("g_best =", round(g_best, 5), ", n_best =", round(n_best, 5), "best_idx =", best_idx, ", p =", p)
     y_model = 1 - np.exp(-g_best * x_data**n_best)
 
-    ax.plot(x_data[lower_idx:upper_idx+1], y_model[lower_idx:upper_idx+1], color=color, linestyle=linestyle, linewidth = 1)
+    ax.plot(x_data[lower_idx:upper_idx+1], y_model[lower_idx:upper_idx+1], color=color, linestyle=linestyle, linewidth=linewidth)
     
     if plot_vlines:
         ax.axvline(x=x_data[lower_idx], ymin=yMin_1, ymax=yMax_1, color=color, alpha=0.3, zorder=0)

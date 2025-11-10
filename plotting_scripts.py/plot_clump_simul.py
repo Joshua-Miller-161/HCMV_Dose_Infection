@@ -1,9 +1,10 @@
+import sys
+sys.dont_write_bytecode = True
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
 import pandas as pd
 import yaml
-import sys
 import os
 import json
 
@@ -17,8 +18,14 @@ from simulation_utils.utils import PrepareData
 # file_simul      = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
 # file_simul_size = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_sp_fix_r=1_CLUMP.json"
 
-file_simul      = "simulation_results/clump/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
-file_simul_size = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_CLUMP.json"
+# file_simul      = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_poly_fix_r=1_n=10.csv"
+# file_simul_size = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_poly_fix_r=1_CLUMP.json"
+
+# file_simul      = "simulation_results/clump/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_lin_fix_r=1_n=10.csv"
+# file_simul_size = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_dist_interp_s=10_vMax=10000.0_lin_fix_r=1_CLUMP.json"
+
+# file_simul      = "simulation_results/clump/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_n=10.csv"
+# file_simul_size = "simulation_results/clump/clump_information/ClumpSimulVVG_use_with_size_distribution_s=10_vMax=10000.0_sp_fix_r=1_CLUMP.json"
 
 file_data = "data/Experimental_data_Ed_Josh.xlsx"
 
@@ -58,7 +65,7 @@ print(UPPERS)
 MARKERS = config['PLOTTING']['markers_dict']#['o', '^', 's', 'D']
 COLORS  = config['PLOTTING']['colors_dict']
 
-if (('GFP' in SHEET_NAMES[sheet]) or (SHEET_NAMES[sheet] == 'use_with_size_distribution')):
+if (('GFP' in SHEET_NAMES[sheet]) or (SHEET_NAMES[sheet] == 'use_with_size_dist_interp')):
     color  = COLORS['GFP']
     marker = MARKERS['GFP']
 elif (('cherry' in SHEET_NAMES[sheet]) or ('mCherry' in SHEET_NAMES[sheet]) or ('mC' in SHEET_NAMES[sheet])):
@@ -185,13 +192,13 @@ yMin = 10**-6
 yMax = 1
 
 legendD = mlines.Line2D([], [], color='b', linestyle='-.', markerfacecolor=color, markeredgecolor='none', markerfacecoloralt='none', marker=marker,
-                          markersize=10, label = "HCMV-TB (GFP) (data): n = " + str(round(n_data, 3)) + ' (p='+str(round(p_data, 5)) + ')')
+                          markersize=10, label = "HCMV-TB (GFP) (data): n = " + str(round(n_data, 3)))
 legendS = ''
 if (num_simulations == 1):
     legendS = mlines.Line2D([], [], color='y', linestyle='--', markerfacecolor='none', markeredgecolor=color, markerfacecoloralt='none', marker=marker,
-                            markersize=10, label= "Simulation: n = " + str(round(n_simul, 3)) + ' (p='+str(round(p_simul, 5)) + ')')
+                            markersize=10, label= "Simulation: n = " + str(round(n_simul, 3)))
 elif (num_simulations > 1):
-    legendS = mlines.Line2D([], [], color='k', linestyle='-', label=r'Simul. mean, $\overline{n} = $' + str(round(n_simul, 3)) + ' (p='+str(round(p_simul, 5)) + ')' + " ("+str(num_simulations)+" runs)")
+    legendS = mlines.Line2D([], [], color='k', linestyle='-', label=r'Simul. mean, $\overline{n} = $' + str(round(n_simul, 3)) + " ("+str(num_simulations)+" runs)")
 
 ax0.legend(handles = [legendD, legendS], loc='upper left', prop={'size': 8})
 ax0.plot(np.linspace(xMin,xMax), np.linspace(yMin, yMax), 'k--', linewidth = 1)

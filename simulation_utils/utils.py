@@ -269,62 +269,6 @@ def CalcNumClumps(total_virions, max_virions_in_clump, diameter_nz,
 
     return num_clumps_of_size_i
 #====================================================================
-def GenClumpFromDiameter(diameter, mean, lb, ub, scheme='linear', dist='uniform', stdev=35, target_x=None, target_prob=0.004,
-                         tolerance=0.01):
-    assert (scheme in ['linear', 'regular_polygon', 'sphere_packing']), "scheme must be 'linear', 'regular_polygon', or 'sphere_packing'."
-    assert (dist in ['uniform', 'normal', 'fixed']), "dist must be 'uniform', 'normal' or 'fixed'."
-    #----------------------------------------------------------------
-    if ((dist=='uniform') or (dist=='normal')):
-        err = 9999
-        while (err >= tolerance):
-            if (dist == 'uniform'):
-                virion_diam = np.random.uniform(lb, ub, 1)[0]
-                if (virion_diam >= diameter):
-                    virions_in_clump = 1
-                    break
-
-            elif (dist == 'normal'):
-                virion_diam = np.random.normal(mean, stdev, 1)[0]
-                if (virion_diam >= diameter):
-                    virions_in_clump = 1
-                    break
-                else:
-                    if (virion_diam < lb):
-                        virion_diam = lb
-                    elif (virion_diam > ub):
-                        virion_diam = ub
-            
-            if (scheme=='linear'):
-                virions_in_clump = diameter / virion_diam
-            elif (scheme=='regular_polygon'):
-                virions_in_clump = np.pi / np.arcsin(virion_diam / diameter)
-                #print("POLY:", virion_diam, diameter, np.arcsin(virion_diam / diameter), virions_in_clump)
-            elif (scheme=='sphere_packing'):
-                virions_in_clump = 0.64 * (diameter / virion_diam)**3
-            
-            virions_in_clump_low = int(virions_in_clump)
-            virions_in_clump_hi  = virions_in_clump_low + 1
-
-            err = min([abs(virions_in_clump - virions_in_clump_low), abs(virions_in_clump - virions_in_clump_hi)])
-
-            print("diam=", diameter, ", virion_diam=", round(virion_diam, 5), ", virions_in_clump=", round(virions_in_clump, 5), ", err=", round(err, 5))
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    elif (dist=='fixed'):
-        virion_diam = mean
-        if (scheme=='linear'):
-            virions_in_clump = diameter / virion_diam
-        elif (scheme=='regular_polygon'):
-            virions_in_clump = np.pi / np.arcsin(virion_diam / diameter)
-            #print("POLY:", virion_diam, diameter, np.arcsin(virion_diam / diameter), virions_in_clump)
-        elif (scheme=='sphere_packing'):
-            virions_in_clump = 0.64 * (diameter / virion_diam)**3
-    #------------------------------------------------------------
-    num_virions = round(virions_in_clump)
-    print("diam=", diameter, ", virion_diam=", round(virion_diam, 5), ", virions_in_clump=", round(virions_in_clump, 5), ", err=", round(err, 5))
-    #----------------------------------------------------------------
-    return num_virions, virion_diam
-
-#====================================================================
 def GetVirionDiam(distribution, mean_virion_diam=230, lb_virion_diam=150, ub_virion_diam=300, std_virion_diam=35):
     if (distribution == 'uniform'):
         virion_diam = np.random.uniform(lb_virion_diam, ub_virion_diam, 1)[0]
@@ -342,13 +286,16 @@ def GetVirionDiam(distribution, mean_virion_diam=230, lb_virion_diam=150, ub_vir
     return virion_diam
 #====================================================================
 def GetVirionsInClumpFromDiameter(scheme, diameter, virion_diam):
-    if (scheme=='linear'):
-        virions_in_clump = diameter / virion_diam
-    elif (scheme=='regular_polygon'):
-        virions_in_clump = np.pi / np.arcsin(virion_diam / diameter)
-        #print("POLY:", virion_diam, diameter, np.arcsin(virion_diam / diameter), virions_in_clump)
-    elif (scheme=='sphere_packing'):
-        virions_in_clump = 0.64 * (diameter / virion_diam)**3
+    if (diameter < virion_diam):
+        virions_in_clump = 1
+    else:
+        if (scheme=='linear'):
+            virions_in_clump = diameter / virion_diam
+        elif (scheme=='regular_polygon'):
+            virions_in_clump = np.pi / np.arcsin(virion_diam / diameter)
+            #print("  POLY:", virion_diam, diameter, np.arcsin(virion_diam / diameter), virions_in_clump)
+        elif (scheme=='sphere_packing'):
+            virions_in_clump = 0.64 * (diameter / virion_diam)**3
     
     return virions_in_clump
 #====================================================================
