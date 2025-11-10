@@ -48,8 +48,9 @@ To modify the simulation parameters themselves, such as vMax, gamma, kappa, beta
 
 ## What is clump sandbox?
 - The clump_sandbox folder is for the user to test out theoretical clump size distributions based on either Poisson, geometric, or 1-inflated geometric distribution. All parameters can be controlled in the sandbox_config.yml file. To run do:
+
     conda activate hcmv_env
-    
+
     python3 clump_sandbox/run_simulation.py
 
 # Plotting a simulation
