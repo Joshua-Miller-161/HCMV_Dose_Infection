@@ -6,6 +6,7 @@ SIMULATION_PARAMETERS:
   scale: 1 # Keep between 1 and 1000, bigger number=faster simulation
   gamma: .45 # ??
   remove: 1 # 1: take out virions which infect a cell, 0: don't.
+  remove_clump: 0 # Remove ENTIRE CLUMP if one virion from it infects a cell, 0: don't
   cell_count: 1000
   num_fits: 10 # How many times to try fitting clump frequencies to distribution
 

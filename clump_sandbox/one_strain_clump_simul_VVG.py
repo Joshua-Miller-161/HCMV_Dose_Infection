@@ -115,8 +115,8 @@ def SimulateClump(GENOMES_WELL,
                     if (simul_name == 'clump' or simul_name == 'var_clump_diam'):
                         for b in range(len(VIRION_ATTACKERS)):
                             is_successful = Innoculation(VIRION_ATTACKERS[b], 
-                                                        CELL_POOL[cell_num], 
-                                                        PARAM_DICT['gamma'])
+                                                         CELL_POOL[cell_num], 
+                                                         PARAM_DICT['gamma'])
                             #total += 1 ORIGINAL
                             if is_successful:
                                 TO_REMOVE_IDX.append(VIRION_ATTACKERS_IDX[b])
@@ -132,8 +132,8 @@ def SimulateClump(GENOMES_WELL,
                         for b in range(len(VIRION_ATTACKERS)):
                             VIRION_ATTACKERS[b].i = Compensate(best_inf, VIRION_ATTACKERS[b], PARAM_DICT['kappa'])
                             is_successful = Innoculation(VIRION_ATTACKERS[b], 
-                                                        CELL_POOL[cell_num], 
-                                                        PARAM_DICT['gamma'])
+                                                         CELL_POOL[cell_num], 
+                                                         PARAM_DICT['gamma'])
                             total += 1
                             #print("aaa=", aaa, TO_REMOVE_IDX[aaa], "len(GFP_POOL)=", len(GFP_POOL))
                             if is_successful:
@@ -143,10 +143,10 @@ def SimulateClump(GENOMES_WELL,
                     elif (simul_name == 'clump_acc_dam'):
                         for b in range(len(VIRION_ATTACKERS)):
                             is_successful = Innoculation(VIRION_ATTACKERS[b], 
-                                                        CELL_POOL[cell_num], 
-                                                        gamma=PARAM_DICT['gamma'], 
-                                                        acc_dam=True, 
-                                                        beta=PARAM_DICT['beta'])
+                                                         CELL_POOL[cell_num], 
+                                                         gamma=PARAM_DICT['gamma'], 
+                                                         acc_dam=True, 
+                                                         beta=PARAM_DICT['beta'])
 
                             total += 1
                             if is_successful:
@@ -154,8 +154,17 @@ def SimulateClump(GENOMES_WELL,
                                 #print("----- match ----- inf:", is_successful, ",len:", len(GFP_POOL))
                     # - - - - - - - - - - - - - - - - - - - - - - - -
                     if (PARAM_DICT['remove'] == 1):
-                        # Remove virions which successfully infected from pool
-                        TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
+                        if (PARAM_DICT['remove_clump'] == 1):
+                            for i in range(len(TO_REMOVE_IDX)):
+                                for j in range(len(GFP_POOL)):
+                                    if (GFP_POOL[TO_REMOVE_IDX[i]].num == GFP_POOL[j].num): # Find virions in same clump as successfully infecting virion
+                                        TO_REMOVE_IDX.append(j)
+                            
+                            #print("TO_REMOVE_IDX", TO_REMOVE_IDX, type(TO_REMOVE_IDX))
+                            TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
+
+                        else:# Remove virions which successfully infected from pool
+                            TO_REMOVE_IDX = list(sorted(set(TO_REMOVE_IDX), reverse=True))
 
                         for idx in range(len(TO_REMOVE_IDX)):
                             if (len(TO_REMOVE_IDX) >= len(GFP_POOL)):
@@ -164,7 +173,7 @@ def SimulateClump(GENOMES_WELL,
                             else:
                                 #print("idx=",idx,", idx=", TO_REMOVE_IDX[idx], ', len=', len(TO_REMOVE_IDX), ", virions left=", len(GFP_POOL))
                                 #GFP_POOL.remove(GFP_POOL[TO_REMOVE_IDX[idx]]) works but slow
-                                #print("cell_num=", cell_num, ", len(GFP)=", len(GFP_POOL), ", len(REMOVE)=", len(TO_REMOVE_IDX), ", idx=", idx, ", r_idx=", TO_REMOVE_IDX[idx])
+                                print("cell_num=", cell_num, ", len(GFP)=", len(GFP_POOL), ", len(REMOVE)=", len(TO_REMOVE_IDX), ", idx=", idx, ", r_idx=", TO_REMOVE_IDX[idx], ", clump_num=", GFP_POOL[TO_REMOVE_IDX[idx]].num)
                                 del GFP_POOL[TO_REMOVE_IDX[idx]]
 
                     #if (cell_num == 0 or cell_num == 500 or cell_num == 1500 or cell_num == 2299):

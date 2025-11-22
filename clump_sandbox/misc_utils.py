@@ -13,6 +13,7 @@ def PrepareParameters(config, simul_name):
     PARAM_DICT['num_simulations'] = int(config['SIMULATION_PARAMETERS']['num_simulations'])
     PARAM_DICT['num_fits']        = int(config['SIMULATION_PARAMETERS']['num_fits'])
     PARAM_DICT['remove']          = int(config['SIMULATION_PARAMETERS']['remove'])
+    PARAM_DICT['remove_clump']    = int(config['SIMULATION_PARAMETERS']['remove_clump'])
     PARAM_DICT['i_mean']  = float(config['GFP_VIRUS_PARAMETERS']['mu_inf']) #0
     PARAM_DICT['i_stdev'] = float(config['GFP_VIRUS_PARAMETERS']['std_inf']) #1
     PARAM_DICT['r_mean']  = float(config['CELL_PARAMETERS']['mu_res'])
@@ -102,13 +103,13 @@ def MakeFilename(PARAM_DICT):
             param_text += '_f_1='+str(PARAM_DICT['f_1'])
 
         if (PARAM_DICT['simul_name'] == 'clump'):
-            filename = "ClumpSimulVVG_"+param_text+"_r="+str(PARAM_DICT['remove'])+"_n="+str(PARAM_DICT['num_simulations']) # Specify filename
+            filename = "ClumpSimulVVG_"+param_text+"_r="+str(PARAM_DICT['remove'])+"_rc="+str(PARAM_DICT['remove_clump'])+"_n="+str(PARAM_DICT['num_simulations']) # Specify filename
         
         elif (PARAM_DICT['simul_name'] == 'clump_comp'):
-            filename = "ClumpCompSimulVVG_"+param_text+"_k="+PARAM_DICT['kappa']+"_r="+str(PARAM_DICT['remove'])+"_n="+str(PARAM_DICT['num_simulations']) # Specify filename
+            filename = "ClumpCompSimulVVG_"+param_text+"_k="+PARAM_DICT['kappa']+"_r="+str(PARAM_DICT['remove'])+"_rc="+str(PARAM_DICT['remove_clump'])+"_n="+str(PARAM_DICT['num_simulations']) # Specify filename
         
         elif (PARAM_DICT['simul_name'] == 'clump_acc_dam'):
-            filename = "ClumpAccDamSimulVVG_"+param_text+"_b="+str(PARAM_DICT['beta'])+"_r="+str(PARAM_DICT['remove'])+"_n="+str(PARAM_DICT['num_simulations']) # Specify filename
+            filename = "ClumpAccDamSimulVVG_"+param_text+"_b="+str(PARAM_DICT['beta'])+"_r="+str(PARAM_DICT['remove'])+"_rc="+str(PARAM_DICT['remove_clump'])+"_n="+str(PARAM_DICT['num_simulations']) # Specify filename
 
     return filename
 #====================================================================
